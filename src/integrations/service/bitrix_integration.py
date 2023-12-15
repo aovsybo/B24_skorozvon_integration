@@ -44,4 +44,8 @@ def create_bitrix_deal(deal_name, lead_name, call_phone, lead_comment, share_lin
             "CONTACT_ID": current_contact_id
         }
     }
-    requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json=data)
+    response = requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json=data)
+    return {
+        "status": response.status_code,
+        "message": response.text
+    }

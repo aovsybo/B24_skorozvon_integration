@@ -6,9 +6,13 @@ from django.conf import settings
 bot = telebot.TeleBot(settings.TG_API_TOKEN)
 
 
-@bot.message_handler(commands=[])
-def send_message(data: dict):
+def send_fields_message(fields: dict):
     message = ""
-    for field, value in data.items():
+    for field, value in fields.items():
         message += f"{field}: {value}\n"
+    send_message(message)
+
+
+@bot.message_handler(commands=[])
+def send_message(message: str):
     bot.send_message(settings.TG_ID_RECEIVER, message)
