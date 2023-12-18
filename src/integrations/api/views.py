@@ -16,6 +16,11 @@ from src.integrations.service.google_sheet_integration import send_to_google_she
 from src.integrations.service.telegram_integration import send_message, send_fields_message
 
 
+class BaseView(APIView):
+    def get(self, request):
+        return Response(data={"message": "ok"}, status=status.HTTP_200_OK)
+
+
 class PhoneCallInfoAPI(APIView):
     def post(self, request):
         data = {
