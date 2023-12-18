@@ -6,14 +6,14 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .serializers import CallInfoSerializer
-from src.integrations.service.yandex_disk_integration import (
+from integrations.service.yandex_disk_integration import (
     upload_to_disk,
     get_file_share_link
 )
-from src.integrations.service.skorozvon_integration import get_call
-from src.integrations.service.bitrix_integration import create_bitrix_deal, get_deal_info
-from src.integrations.service.google_sheet_integration import send_to_google_sheet
-from src.integrations.service.telegram_integration import send_message, send_fields_message
+from integrations.service.skorozvon_integration import get_call
+from integrations.service.bitrix_integration import create_bitrix_deal, get_deal_info
+from integrations.service.google_sheet_integration import send_to_google_sheet
+from integrations.service.telegram_integration import send_message, send_fields_message
 
 
 class BaseView(APIView):

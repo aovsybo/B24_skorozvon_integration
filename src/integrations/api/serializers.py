@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from src.integrations.models import CallInfo
+from integrations.models import CallInfo
 
 
 class CallInfoSerializer(serializers.ModelSerializer):
