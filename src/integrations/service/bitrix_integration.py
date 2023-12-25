@@ -3,12 +3,11 @@ import requests
 from django.conf import settings
 
 
-def get_deal_info():
-    fields = requests.get(settings.BITRIX_GET_DEAL_API_URL).json()["result"]
-    last_deal = fields[-1]
+def get_deal_info(deal_id: int):
+    deal = requests.get(settings.BITRIX_GET_CONTACT_BY_ID, params={"ID": deal_id}).json()["result"]
     response = {}
     for header in settings.REQUEST_FIELDS:
-        response[header] = last_deal[header]
+        response[header] = deal[header]
     return response
 
 
