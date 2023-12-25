@@ -4,7 +4,7 @@ from django.conf import settings
 
 
 def get_deal_info(deal_id: int):
-    deal = requests.get(settings.BITRIX_GET_CONTACT_BY_ID, params={"ID": deal_id}).json()["result"]
+    deal = requests.get(settings.BITRIX_GET_DEAL_BY_ID, params={"ID": deal_id}).json()["result"]
     response = {}
     for header in settings.REQUEST_FIELDS:
         response[header] = deal[header]
