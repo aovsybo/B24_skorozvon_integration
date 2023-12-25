@@ -28,6 +28,7 @@ class PhoneCallInfoAPI(APIView):
             "organisation_phone": request.data["call"]["phone"],
             "comment": request.data["lead"]["comment"],
             "call_id": request.data["call"]["id"],
+            "scenario_id": str(request.data["call"]["scenario_id"]),
         }
         deal_name = f"{request.data['call_result']['result_name']} {request.data['call_result']['result_id']}"
         start_time = time.time()

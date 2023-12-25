@@ -6,3 +6,4 @@ class CallInfo(models.Model):
     organisation_phone = models.CharField(max_length=20)
     comment = models.CharField()
     call_id = models.CharField()
+    scenario_id = models.CharField()
