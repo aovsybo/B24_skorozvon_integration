@@ -62,4 +62,5 @@ class DealCreationHandlerAPI(APIView):
         data = get_deal_info()
         send_to_google_sheet(data)
         send_fields_message(data)
+        send_fields_message(request.data)
         return Response(status=status.HTTP_200_OK)
