@@ -5,9 +5,9 @@ import yadisk
 from django.conf import settings
 
 
-def upload_to_disk(filename: str):
+def upload_to_disk(file_dir: str, filename: str):
     y = yadisk.YaDisk(token=settings.YANDEX_DISK_TOKEN)
-    y.upload(filename, filename)
+    y.upload(f"{file_dir}/{filename}", filename)
 
 
 def get_file_share_link(filename: str):

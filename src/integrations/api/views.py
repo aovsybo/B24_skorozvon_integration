@@ -2,6 +2,7 @@ import os
 import time
 from datetime import datetime
 
+from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -40,10 +41,10 @@ class PhoneCallInfoAPI(APIView):
         call_content = get_call(data["call_id"])
         date_string = datetime.now().strftime("%d%m%Y%H%M%S")
         file_name = f"call_audio_{data['call_id']}_{date_string}.mp3"
-        with open(file_name, "wb") as f:
+        with open(f"{settings.BASE_DIR}/{file_name}", "wb") as f:
             f.write(call_content)
-        upload_to_disk(file_name)
-        # os.remove(file_name)
+        upload_to_disk(settings.BASE_DIR, file_name)
+        os.remove(f"{settings.BASE_DIR}/{file_name}")
         yandex_disk_link = get_file_share_link(file_name)
         create_bitrix_deal(
             deal_name,
