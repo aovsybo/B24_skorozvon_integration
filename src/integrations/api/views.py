@@ -1,5 +1,6 @@
 import os
 import time
+from datetime import datetime
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -37,7 +38,8 @@ class PhoneCallInfoAPI(APIView):
         serializer.save()
 
         call_content = get_call(data["call_id"])
-        file_name = f"call_audio_{data['call_id']}.mp3"
+        date_string = datetime.now().strftime("%d%m%Y%H%M%S")
+        file_name = f"call_audio_{data['call_id']}_{date_string}.mp3"
         with open(file_name, "wb") as f:
             f.write(call_content)
         upload_to_disk(file_name)
