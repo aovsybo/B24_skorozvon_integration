@@ -43,7 +43,7 @@ class PhoneCallInfoAPI(APIView):
         with open(file_name, "wb") as f:
             f.write(call_content)
         upload_to_disk(file_name)
-        os.remove(file_name)
+        # os.remove(file_name)
         yandex_disk_link = get_file_share_link(file_name)
         create_bitrix_deal(
             deal_name,
@@ -56,7 +56,6 @@ class PhoneCallInfoAPI(APIView):
         time_limit_minutes = 10
         if upload_time_minutes > time_limit_minutes:
             send_message(f"Загрузка аудиофайла по звонку {data['call_id']} составила {upload_time_minutes}.")
-        print('Elapsed time: ', )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
