@@ -15,4 +15,4 @@ def send_fields_message(fields: dict):
 
 @bot.message_handler(commands=[])
 def send_message(message: str):
-    bot.send_message(settings.TG_ID_RECEIVER, message)
+    bot.send_message(chat_id=settings.TG_ID_RECEIVER, text=message)

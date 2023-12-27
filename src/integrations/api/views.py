@@ -13,7 +13,7 @@ from integrations.service.yandex_disk_integration import (
     get_file_share_link
 )
 from integrations.service.skorozvon_integration import get_call
-from integrations.service.bitrix_integration import create_bitrix_deal, get_deal_info
+from integrations.service.bitrix_integration import create_bitrix_deal, get_deal_info, get_category_id
 from integrations.service.google_sheet_integration import send_to_google_sheet
 from integrations.service.telegram_integration import send_message, send_fields_message
 
@@ -46,12 +46,15 @@ class PhoneCallInfoAPI(APIView):
         upload_to_disk(settings.BASE_DIR, file_name)
         os.remove(f"{settings.BASE_DIR}/{file_name}")
         yandex_disk_link = get_file_share_link(file_name)
+        # Ввести ниже название воронки, куда будет добавляться сделка
+        category_id = get_category_id("Новые сделки")
         create_bitrix_deal(
             deal_name,
             data["organisation_name"],
             {"VALUE": data["organisation_phone"], "VALUE_TYPE": "WORK"},
             data["comment"],
             yandex_disk_link,
+            category_id,
         )
         upload_time_minutes = int((time.time() - start_time) // 60)
         time_limit_minutes = 10

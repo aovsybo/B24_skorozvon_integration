@@ -33,14 +33,15 @@ def get_current_contact_id(lead_name, call_phone):
     return current_contact["ID"]
 
 
-def create_bitrix_deal(deal_name, lead_name, call_phone, lead_comment, share_link):
+def create_bitrix_deal(deal_name, lead_name, call_phone, lead_comment, share_link, category_id):
     current_contact_id = get_current_contact_id(lead_name, call_phone)
     data = {
         "fields": {
             "TITLE": deal_name,
             "COMMENTS": f"Запись разговора: {share_link}\n"
                         f"Комментарий: {lead_comment}",
-            "CONTACT_ID": current_contact_id
+            "CONTACT_ID": current_contact_id,
+            "CATEGORY_ID": category_id
         }
     }
     response = requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json=data)
@@ -48,3 +49,12 @@ def create_bitrix_deal(deal_name, lead_name, call_phone, lead_comment, share_lin
         "status": response.status_code,
         "message": response.text
     }
+
+
+def get_category_id(category_name):
+    response = requests.get(settings.BITRIX_GET_DEAL_CATEGORY)
+    categories = response.json()["result"]
+    for category in categories:
+        if category["NAME"] == category_name:
+            return category["ID"]
+    return 0
