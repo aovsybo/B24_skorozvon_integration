@@ -12,7 +12,7 @@ def get_deal_info(deal_id):
     response["lead_qualification"] = deal["UF_CRM_1664819117290"]
     response["lead_comment"] = deal["UF_CRM_1664819040131"]
     response["link_to_audio"] = deal["UF_CRM_1664819217017"]
-    response["date"] = deal["CLOSEDATE"]
+    response["date"] = deal["CLOSEDATE"].split("T")[0]
     return response, deal["CATEGORY_ID"]
 
 
