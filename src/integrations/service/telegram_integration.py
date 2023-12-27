@@ -12,8 +12,8 @@ def send_fields_message(fields: dict):
 Телефон: {fields['phone']};\n
 Комментарий: {fields['lead_comment']};\n
 Доп. комментарии: {fields['lead_type']} | {fields['lead_qualification']};\n
-Ссылка на запись: {fields['link_to_audio']} ;\n
-Дата лида: {fields['date']}"""
+Ссылка на запись: {fields['link_to_audio']};\n
+Дата лида: {fields['date']};"""
     send_message(message)
 
 
