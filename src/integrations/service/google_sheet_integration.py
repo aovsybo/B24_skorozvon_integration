@@ -28,7 +28,7 @@ def get_service():
 def send_to_google_sheet(data):
     service = get_service()
     body = {
-        "values": [[data[header] for header in settings.REQUEST_FIELDS]]
+        "values": [[value[1] for value in data.values()]]
     }
     result = service.spreadsheets().values().append(
         spreadsheetId=settings.SAMPLE_SPREADSHEET_ID, range=f"Лист1!1:{len(data)}",
