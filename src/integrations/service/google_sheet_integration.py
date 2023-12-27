@@ -25,12 +25,20 @@ def get_service():
     return build('sheets', 'v4', credentials=creds)
 
 
-def send_to_google_sheet(data):
+def send_to_google_sheet(fields: dict):
     service = get_service()
     body = {
-        "values": [[value[1] for value in data.values()]]
+        "values": [[
+            f"{fields['lead_name']}_{fields['phone']}",
+            fields['lead_name'],
+            fields['phone'],
+            fields['lead_comment'],
+            f"{fields['lead_type']} | {fields['lead_qualification']}",
+            fields['link_to_audio'],
+            fields['date'],
+        ]]
     }
     result = service.spreadsheets().values().append(
-        spreadsheetId=settings.SAMPLE_SPREADSHEET_ID, range=f"Лист1!1:{len(data)}",
+        spreadsheetId=settings.SAMPLE_SPREADSHEET_ID, range=f"Лист1!1:{len(fields)}",
         valueInputOption="RAW", body=body).execute()
     return result
