@@ -2,4 +2,6 @@
 .venv/
 .env
 credentials.json
+credentials_SG.json
 token.json
+token_SG.json

@@ -8,8 +8,8 @@ bot = telebot.TeleBot(settings.TG_API_TOKEN)
 
 def send_fields_message(fields: dict):
     message = ""
-    for field, value in fields.items():
-        message += f"{field}: {value}\n"
+    for value in fields.values():
+        message += f"{value[0]}: {value[1]}\n\n"
     send_message(message)
 
 
