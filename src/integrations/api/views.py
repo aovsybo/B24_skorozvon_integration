@@ -68,8 +68,8 @@ class PhoneCallInfoAPI(APIView):
 
 class DealCreationHandlerAPI(APIView):
     def post(self, request):
-        data = get_deal_info(request.data["data[FIELDS][ID]"])
-        if data["CATEGORY_ID"] == get_category_id(CATEGORY_NAME):
+        data, category_id = get_deal_info(request.data["data[FIELDS][ID]"])
+        if category_id == get_category_id(CATEGORY_NAME):
             send_to_google_sheet(data)
             send_fields_message(data)
         return Response(status=status.HTTP_200_OK)

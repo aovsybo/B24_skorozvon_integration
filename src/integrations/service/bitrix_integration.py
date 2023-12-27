@@ -12,7 +12,7 @@ def get_deal_info(deal_id):
     response["lead_qualification"] = ("Квалификаций лида", deal["UF_CRM_1664819117290"])
     response["lead_comment"] = ("Комментарий к лиду", deal["UF_CRM_1664819040131"])
     response["link_to_audio"] = ("Ссылка на аудиозапись[актуальная]", deal["UF_CRM_1664819217017"])
-    return response
+    return response, deal["CATEGORY_ID"]
 
 
 def create_contact(lead_name, call_phone):
