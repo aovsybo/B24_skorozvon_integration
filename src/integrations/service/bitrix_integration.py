@@ -6,12 +6,13 @@ from django.conf import settings
 def get_deal_info(deal_id):
     deal = requests.get(settings.BITRIX_GET_DEAL_BY_ID, params={"ID": deal_id}).json()["result"]
     response = dict()
-    response["phone"] = ("Телефон", deal["UF_CRM_1665719874029"])
-    response["lead_name"] = ("Имя лида", deal["UF_CRM_1664819061161"])
-    response["lead_type"] = ("Тип лида", deal["UF_CRM_1664819174514"])
-    response["lead_qualification"] = ("Квалификаций лида", deal["UF_CRM_1664819117290"])
-    response["lead_comment"] = ("Комментарий к лиду", deal["UF_CRM_1664819040131"])
-    response["link_to_audio"] = ("Ссылка на аудиозапись[актуальная]", deal["UF_CRM_1664819217017"])
+    response["lead_name"] = deal["UF_CRM_1664819061161"]
+    response["phone"] = deal["UF_CRM_1665719874029"]
+    response["lead_type"] = deal["UF_CRM_1664819174514"]
+    response["lead_qualification"] = deal["UF_CRM_1664819117290"]
+    response["lead_comment"] = deal["UF_CRM_1664819040131"]
+    response["link_to_audio"] = deal["UF_CRM_1664819217017"]
+    response["date"] = deal["CLOSEDATE"]
     return response, deal["CATEGORY_ID"]
 
 

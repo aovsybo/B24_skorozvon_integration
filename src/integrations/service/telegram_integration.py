@@ -7,9 +7,15 @@ bot = telebot.TeleBot(settings.TG_API_TOKEN)
 
 
 def send_fields_message(fields: dict):
-    message = ""
-    for value in fields.values():
-        message += f"{value[0]}: {value[1]}\n\n"
+    message = f"""
+    Новый лид: {fields['lead_name']}_{fields['phone']};\n\n
+    Имя: {fields['lead_name']};\n\n
+    Телефон: {fields['phone']};\n\n
+    Комментарий: {fields['lead_comment']};\n\n
+    Доп. комментарии: {fields['lead_type']} | {fields['lead_qualification']};\n\n
+    Ссылка на запись: {fields['link_to_audio']} ;\n\n
+    Дата лида: {fields['date']}
+    """
     send_message(message)
 
 
