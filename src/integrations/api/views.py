@@ -77,13 +77,6 @@ class DealCreationHandlerAPI(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class TestPost(APIView):
-    def post(self, request):
-        for key, value in request.data.items():
-            send_message(f"{key}: {value}", 324267699)
-        return Response(status=status.HTTP_200_OK)
-
-
 class GetCalls(APIView):
     def get(self, request):
         calls = get_calls()
