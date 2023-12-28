@@ -27,10 +27,9 @@ BITRIX_GET_DEAL_API_URL = os.environ.get("BITRIX_GET_DEAL_API_URL")
 BITRIX_GET_DEAL_CATEGORY = os.environ.get("BITRIX_GET_DEAL_CATEGORY")
 
 SCOPES = os.environ.get("SCOPES").split(',')
-SAMPLE_SPREADSHEET_ID = os.environ.get("SAMPLE_SPREADSHEET_ID")
+INTEGRATIONS_SPREADSHEET_ID = os.environ.get("INTEGRATIONS_SPREADSHEET_ID")
+
 TG_API_TOKEN = os.environ.get("TG_API_TOKEN")
-TG_ID_RECEIVER = os.environ.get("TG_ID_RECEIVER")
-REQUEST_FIELDS = ["TITLE", "CONTACT_ID", "COMMENTS"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

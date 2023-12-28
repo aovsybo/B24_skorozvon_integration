@@ -25,7 +25,7 @@ def get_service():
     return build('sheets', 'v4', credentials=creds)
 
 
-def send_to_google_sheet(fields: dict):
+def send_to_google_sheet(fields: dict, spreadsheet_id: str):
     service = get_service()
     body = {
         "values": [[
@@ -39,6 +39,26 @@ def send_to_google_sheet(fields: dict):
         ]]
     }
     result = service.spreadsheets().values().append(
-        spreadsheetId=settings.SAMPLE_SPREADSHEET_ID, range=f"Лист1!1:{len(fields)}",
+        spreadsheetId=spreadsheet_id, range=f"Лист1!1:{len(fields)}",
         valueInputOption="RAW", body=body).execute()
     return result
+
+
+def get_table(funnel):
+    service = get_service()
+    response = service.spreadsheets().values().get(
+        spreadsheetId=settings.INTEGRATIONS_SPREADSHEET_ID,
+        range="Лист1"
+    ).execute()
+    table = response["values"]
+    integration = list(filter(lambda x: x[0] == funnel, table))
+    integration_data = {
+            "tg": "",
+            "table_link": ""
+        }
+    if integration:
+        integration_data["tg"] = integration[0][1]
+        integration_data["sheets"] = integration[0][2].split(
+            "https://docs.google.com/spreadsheets/d/"
+        )[1].split("/")[0]
+    return integration_data

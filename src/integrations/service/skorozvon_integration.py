@@ -24,3 +24,13 @@ def get_call(call_id: int):
     url = f"https://app.skorozvon.ru/api/v2/calls/{call_id}.mp3"
     response = requests.get(url, headers=headers)
     return response.content
+
+
+def get_calls():
+    token = get_token()
+    headers = {
+        "Authorization": token
+    }
+    url = f"https://app.skorozvon.ru/api/v2/calls/"
+    response = requests.get(url, headers=headers)
+    return response.json()

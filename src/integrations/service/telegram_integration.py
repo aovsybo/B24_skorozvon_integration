@@ -6,7 +6,7 @@ from django.conf import settings
 bot = telebot.TeleBot(settings.TG_API_TOKEN)
 
 
-def send_fields_message(fields: dict):
+def send_fields_message(fields: dict, receiver_id: int):
     message = f"""Новый лид: {fields['lead_name']}_{fields['phone']};\n
 Имя: {fields['lead_name']};\n
 Телефон: {fields['phone']};\n
@@ -14,9 +14,9 @@ def send_fields_message(fields: dict):
 Доп. комментарии: {fields['lead_type']} | {fields['lead_qualification']};\n
 Ссылка на запись: {fields['link_to_audio']};\n
 Дата лида: {fields['date']};"""
-    send_message(message)
+    send_message(message, receiver_id)
 
 
 @bot.message_handler(commands=[])
-def send_message(message: str):
-    bot.send_message(chat_id=settings.TG_ID_RECEIVER, text=message)
+def send_message(message: str, receiver_id: int):
+    bot.send_message(chat_id=receiver_id, text=message)

@@ -12,9 +12,9 @@ from integrations.service.yandex_disk_integration import (
     upload_to_disk,
     get_file_share_link
 )
-from integrations.service.skorozvon_integration import get_call
+from integrations.service.skorozvon_integration import get_call, get_calls
 from integrations.service.bitrix_integration import create_bitrix_deal, get_deal_info, get_category_id
-from integrations.service.google_sheet_integration import send_to_google_sheet
+from integrations.service.google_sheet_integration import send_to_google_sheet, get_table
 from integrations.service.telegram_integration import send_message, send_fields_message
 
 
@@ -70,6 +70,14 @@ class DealCreationHandlerAPI(APIView):
     def post(self, request):
         data, category_id = get_deal_info(request.data["data[FIELDS][ID]"])
         if category_id == get_category_id(CATEGORY_NAME):
-            send_to_google_sheet(data)
-            send_fields_message(data)
+            funnel = "[П44] ТЕСТ ИНТЕГРАЦИЙ"
+            integration_data = get_table(funnel)
+            send_to_google_sheet(data, integration_data["sheets"])
+            send_fields_message(data, integration_data["tg"])
         return Response(status=status.HTTP_200_OK)
+
+
+class GetCalls(APIView):
+    def get(self, request):
+        calls = get_calls()
+        return Response(data={"calls": calls}, status=status.HTTP_200_OK)
