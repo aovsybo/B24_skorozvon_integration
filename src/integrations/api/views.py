@@ -70,7 +70,7 @@ class PhoneCallInfoAPI(APIView):
 class DealCreationHandlerAPI(APIView):
     def post(self, request):
         data, category_id, stage_id = get_deal_info(request.data["data[FIELDS][ID]"])
-        if category_id == get_category_id(CATEGORY_NAME) and stage_id == "EXECUTED":
+        if category_id == get_category_id(CATEGORY_NAME) and stage_id == "EXECUTING":
             integration_data = get_table(CATEGORY_NAME)
             send_to_google_sheet(data, integration_data["sheets"])
             send_fields_message(data, integration_data["tg"])
