@@ -13,13 +13,14 @@ from integrations.service.yandex_disk_integration import (
     get_file_share_link
 )
 from integrations.service.skorozvon_integration import get_call, get_calls
-from integrations.service.bitrix_integration import create_bitrix_deal, get_deal_info, get_category_id
-from integrations.service.google_sheet_integration import send_to_google_sheet, get_table
+from integrations.service.bitrix_integration import (
+    create_bitrix_deal,
+    get_deal_info,
+    get_category_id,
+    get_funnel_names_ids
+)
+from integrations.service.google_sheet_integration import send_to_google_sheet, get_table, get_funnel_names
 from integrations.service.telegram_integration import send_message, send_fields_message
-
-
-# Ввести ниже название воронки, куда будет добавляться сделка
-CATEGORY_NAME = "[П44] ТЕСТ ИНТЕГРАЦИЙ"
 
 
 class BaseView(APIView):
@@ -50,7 +51,8 @@ class PhoneCallInfoAPI(APIView):
         upload_to_disk(settings.BASE_DIR, file_name)
         os.remove(f"{settings.BASE_DIR}/{file_name}")
         yandex_disk_link = get_file_share_link(file_name)
-        category_id = get_category_id(CATEGORY_NAME)
+        category_name = "[П44] ТЕСТ ИНТЕГРАЦИЙ" # Заменить
+        category_id = get_category_id(category_name)
         create_bitrix_deal(
             deal_name,
             data["organisation_name"],
@@ -62,16 +64,20 @@ class PhoneCallInfoAPI(APIView):
         upload_time_minutes = int((time.time() - start_time) // 60)
         time_limit_minutes = 10
         if upload_time_minutes > time_limit_minutes:
-            #TODO: кому отправлять системные сообщения?
-            send_message(f"Загрузка аудиофайла по звонку {data['call_id']} составила {upload_time_minutes}.")
+            send_message(
+                f"Загрузка аудиофайла по звонку {data['call_id']} составила {upload_time_minutes}.",
+                settings.TG_DEV_ACCOUNT
+            )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class DealCreationHandlerAPI(APIView):
     def post(self, request):
+        funnel_names = get_funnel_names()
+        funnel_names_ids = get_funnel_names_ids(funnel_names)
         data, category_id, stage_id = get_deal_info(request.data["data[FIELDS][ID]"])
-        if category_id == get_category_id(CATEGORY_NAME) and stage_id == "EXECUTING":
-            integration_data = get_table(CATEGORY_NAME)
+        if category_id in funnel_names_ids and stage_id == "EXECUTING":
+            integration_data = get_table(funnel_names_ids[category_id])
             send_to_google_sheet(data, integration_data["sheets"])
             send_fields_message(data, integration_data["tg"])
         return Response(status=status.HTTP_200_OK)

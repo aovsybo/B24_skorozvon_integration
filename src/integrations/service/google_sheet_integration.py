@@ -62,3 +62,14 @@ def get_table(funnel):
             "https://docs.google.com/spreadsheets/d/"
         )[1].split("/")[0]
     return integration_data
+
+
+def get_funnel_names():
+    service = get_service()
+    response = service.spreadsheets().values().get(
+        spreadsheetId=settings.INTEGRATIONS_SPREADSHEET_ID,
+        range="Лист1"
+    ).execute()
+    table = response["values"]
+    funnel_names = [integration[0] for integration in table[1:]]
+    return funnel_names

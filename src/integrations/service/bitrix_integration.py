@@ -65,3 +65,13 @@ def get_category_id(category_name):
         if category["NAME"] == category_name:
             return category["ID"]
     return 0
+
+
+def get_funnel_names_ids(funnel_names):
+    response = requests.get(settings.BITRIX_GET_DEAL_CATEGORY)
+    categories = response.json()["result"]
+    funnel_names_ids = dict()
+    for category in categories:
+        if category["NAME"] in funnel_names:
+            funnel_names_ids[category["ID"]] = category["NAME"]
+    return funnel_names_ids

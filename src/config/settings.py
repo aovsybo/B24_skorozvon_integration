@@ -30,6 +30,7 @@ SCOPES = os.environ.get("SCOPES").split(',')
 INTEGRATIONS_SPREADSHEET_ID = os.environ.get("INTEGRATIONS_SPREADSHEET_ID")
 
 TG_API_TOKEN = os.environ.get("TG_API_TOKEN")
+TG_DEV_ACCOUNT = os.environ.get("TG_DEV_ACCOUNT")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
