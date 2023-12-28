@@ -62,18 +62,25 @@ class PhoneCallInfoAPI(APIView):
         upload_time_minutes = int((time.time() - start_time) // 60)
         time_limit_minutes = 10
         if upload_time_minutes > time_limit_minutes:
+            #TODO: кому отправлять системные сообщения?
             send_message(f"Загрузка аудиофайла по звонку {data['call_id']} составила {upload_time_minutes}.")
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class DealCreationHandlerAPI(APIView):
     def post(self, request):
-        data, category_id = get_deal_info(request.data["data[FIELDS][ID]"])
-        if category_id == get_category_id(CATEGORY_NAME):
-            funnel = "[П44] ТЕСТ ИНТЕГРАЦИЙ"
-            integration_data = get_table(funnel)
+        data, category_id, stage_id = get_deal_info(request.data["data[FIELDS][ID]"])
+        if category_id == get_category_id(CATEGORY_NAME) and stage_id == "EXECUTED":
+            integration_data = get_table(CATEGORY_NAME)
             send_to_google_sheet(data, integration_data["sheets"])
             send_fields_message(data, integration_data["tg"])
+        return Response(status=status.HTTP_200_OK)
+
+
+class TestPost(APIView):
+    def post(self, request):
+        for key, value in request.data.items():
+            send_message(f"{key}: {value}", 324267699)
         return Response(status=status.HTTP_200_OK)
 
 

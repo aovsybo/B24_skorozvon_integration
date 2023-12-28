@@ -13,7 +13,8 @@ def get_deal_info(deal_id):
     response["lead_comment"] = deal["UF_CRM_1664819040131"]
     response["link_to_audio"] = deal["UF_CRM_1664819217017"]
     response["date"] = deal["CLOSEDATE"].split("T")[0]
-    return response, deal["CATEGORY_ID"]
+    stage_id = deal["STAGE_ID"].split(":")[1]
+    return response, deal["CATEGORY_ID"], stage_id
 
 
 def create_contact(lead_name, call_phone):
