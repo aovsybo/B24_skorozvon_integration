@@ -25,7 +25,26 @@ BITRIX_GET_LIST_OF_CONTACTS = os.environ.get("BITRIX_GET_LIST_OF_CONTACTS")
 BITRIX_GET_DEAL_BY_ID = os.environ.get("BITRIX_GET_DEAL_BY_ID")
 BITRIX_GET_DEAL_API_URL = os.environ.get("BITRIX_GET_DEAL_API_URL")
 BITRIX_GET_DEAL_CATEGORY = os.environ.get("BITRIX_GET_DEAL_CATEGORY")
-
+BITRIX_LEAD_TYPE = {
+    "49": "есть ПВ",
+    "89": "записать на замер",
+    "87": "посчитать",
+    "51": "С продажи",
+    "83": "без ПВ",
+    "85": "ипотека",
+    "125": "-",
+    "173": "наличные",
+    "175": "кредит или рассрочка",
+}
+BITRIX_LEAD_QUALIFICATION = {
+    "121": "без монтажа",
+    "123": "с монтажом",
+    "45": "для себя",
+    "47": "инвестиция",
+    "117": "уже майнит",
+    "119": "планирует начать майнить",
+    "171": "для кого-то другого",
+}
 SCOPES = os.environ.get("SCOPES").split(',')
 INTEGRATIONS_SPREADSHEET_ID = os.environ.get("INTEGRATIONS_SPREADSHEET_ID")
 
