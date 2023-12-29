@@ -38,13 +38,13 @@ def validate_data(fields: dict):
     lead_type = settings.BITRIX_LEAD_TYPE[fields['lead_type']]
     lead_qualification = settings.BITRIX_LEAD_QUALIFICATION[fields['lead_qualification']]
     insert_data = [
-        f"{fields['lead_name']}_{fields['phone']}",
+        fields['date'],
+        "", ## для записи вручную
         fields['lead_name'],
         fields['phone'],
         fields['lead_comment'],
         f"{lead_type} | {lead_qualification}",
         fields['link_to_audio'],
-        fields['date'],
     ]
     return insert_data
 
