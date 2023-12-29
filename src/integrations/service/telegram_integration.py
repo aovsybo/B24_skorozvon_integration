@@ -7,8 +7,8 @@ bot = telebot.TeleBot(settings.TG_API_TOKEN)
 
 
 def send_fields_message(fields: dict, receiver_id: int):
-    lead_type = settings.BITRIX_LEAD_TYPE["fields['lead_type']"]
-    lead_qualification = settings.BITRIX_LEAD_QUALIFICATION["fields['lead_qualification']"]
+    lead_type = settings.BITRIX_LEAD_TYPE[fields['lead_type']]
+    lead_qualification = settings.BITRIX_LEAD_QUALIFICATION[fields['lead_qualification']]
     message = f"""Новый лид: {fields['lead_name']}_{fields['phone']};\n
 Имя: {fields['lead_name']};\n
 Телефон: {fields['phone']};\n
