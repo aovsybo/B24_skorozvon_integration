@@ -25,10 +25,19 @@ def get_service():
     return build('sheets', 'v4', credentials=creds)
 
 
+def get_table_data():
+    service = get_service()
+    response = service.spreadsheets().values().get(
+        spreadsheetId=settings.INTEGRATIONS_SPREADSHEET_ID,
+        range="Лист1"
+    ).execute()
+    return response["values"]
+
+
 def send_to_google_sheet(fields: dict, spreadsheet_id: str):
     service = get_service()
-    body = {
-        "values": [[
+    table = get_table_data()
+    insert_data = [
             f"{fields['lead_name']}_{fields['phone']}",
             fields['lead_name'],
             fields['phone'],
@@ -36,21 +45,19 @@ def send_to_google_sheet(fields: dict, spreadsheet_id: str):
             f"{fields['lead_type']} | {fields['lead_qualification']}",
             fields['link_to_audio'],
             fields['date'],
-        ]]
-    }
-    result = service.spreadsheets().values().append(
-        spreadsheetId=spreadsheet_id, range=f"Лист1!1:{len(fields)}",
-        valueInputOption="RAW", body=body).execute()
-    return result
+    ]
+    if insert_data not in table:
+        body = {
+            "values": [insert_data]
+        }
+        result = service.spreadsheets().values().append(
+            spreadsheetId=spreadsheet_id, range=f"Лист1!1:{len(fields)}",
+            valueInputOption="RAW", body=body).execute()
+        return result
 
 
 def get_table(funnel):
-    service = get_service()
-    response = service.spreadsheets().values().get(
-        spreadsheetId=settings.INTEGRATIONS_SPREADSHEET_ID,
-        range="Лист1"
-    ).execute()
-    table = response["values"]
+    table = get_table_data()
     integration = list(filter(lambda x: x[0] == funnel, table))
     integration_data = {
             "tg": "",
@@ -65,11 +72,6 @@ def get_table(funnel):
 
 
 def get_funnel_names():
-    service = get_service()
-    response = service.spreadsheets().values().get(
-        spreadsheetId=settings.INTEGRATIONS_SPREADSHEET_ID,
-        range="Лист1"
-    ).execute()
-    table = response["values"]
+    table = get_table_data()
     funnel_names = [integration[0] for integration in table[1:]]
     return funnel_names
