@@ -25,10 +25,10 @@ def get_service():
     return build('sheets', 'v4', credentials=creds)
 
 
-def get_table_data():
+def get_table_data(table_link):
     service = get_service()
     response = service.spreadsheets().values().get(
-        spreadsheetId=settings.INTEGRATIONS_SPREADSHEET_ID,
+        spreadsheetId=table_link,
         range="Лист1"
     ).execute()
     return response["values"]
@@ -47,10 +47,15 @@ def validate_data(fields: dict):
     return insert_data
 
 
-def is_unique_data(fields: dict):
-    table = get_table_data()
+def is_unique_data(fields: dict, funnel_name: str):
     insert_data = validate_data(fields)
-    return f"{table}, {insert_data}"
+    links_table = get_table_data(settings.INTEGRATIONS_SPREADSHEET_ID)
+    table_link = ""
+    for link_field in links_table:
+        if link_field[0] == funnel_name:
+            table_link = link_field[2]
+    funnel_table = get_table_data(get_table_url_from_link(table_link))
+    return f"{funnel_table}, {insert_data}, {insert_data in funnel_table}"
 
 
 def send_to_google_sheet(fields: dict, spreadsheet_id: str):
@@ -64,8 +69,14 @@ def send_to_google_sheet(fields: dict, spreadsheet_id: str):
     return result
 
 
+def get_table_url_from_link(url: str):
+    return url.split(
+            "https://docs.google.com/spreadsheets/d/"
+        )[1].split("/")[0]
+
+
 def get_table(funnel):
-    table = get_table_data()
+    table = get_table_data(settings.INTEGRATIONS_SPREADSHEET_ID)
     integration = list(filter(lambda x: x[0] == funnel, table))
     integration_data = {
             "tg": "",
@@ -73,13 +84,11 @@ def get_table(funnel):
         }
     if integration:
         integration_data["tg"] = integration[0][1]
-        integration_data["sheets"] = integration[0][2].split(
-            "https://docs.google.com/spreadsheets/d/"
-        )[1].split("/")[0]
+        integration_data["sheets"] = get_table_url_from_link(integration[0][2])
     return integration_data
 
 
 def get_funnel_names():
-    table = get_table_data()
+    table = get_table_data(settings.INTEGRATIONS_SPREADSHEET_ID)
     funnel_names = [integration[0] for integration in table[1:]]
     return funnel_names
