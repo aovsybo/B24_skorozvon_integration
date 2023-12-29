@@ -34,26 +34,34 @@ def get_table_data():
     return response["values"]
 
 
+def validate_data(fields: dict):
+    insert_data = [
+        f"{fields['lead_name']}_{fields['phone']}",
+        fields['lead_name'],
+        fields['phone'],
+        fields['lead_comment'],
+        f"{fields['lead_type']} | {fields['lead_qualification']}",
+        fields['link_to_audio'],
+        fields['date'],
+    ]
+    return insert_data
+
+
+def is_unique_data(fields: dict):
+    table = get_table_data()
+    insert_data = validate_data(fields)
+    return f"{table}, {insert_data}"
+
+
 def send_to_google_sheet(fields: dict, spreadsheet_id: str):
     service = get_service()
-    table = get_table_data()
-    insert_data = [
-            f"{fields['lead_name']}_{fields['phone']}",
-            fields['lead_name'],
-            fields['phone'],
-            fields['lead_comment'],
-            f"{fields['lead_type']} | {fields['lead_qualification']}",
-            fields['link_to_audio'],
-            fields['date'],
-    ]
-    if insert_data not in table:
-        body = {
-            "values": [insert_data]
-        }
-        result = service.spreadsheets().values().append(
-            spreadsheetId=spreadsheet_id, range=f"Лист1!1:{len(fields)}",
-            valueInputOption="RAW", body=body).execute()
-        return result
+    body = {
+        "values": [validate_data(fields)]
+    }
+    result = service.spreadsheets().values().append(
+        spreadsheetId=spreadsheet_id, range=f"Лист1!1:{len(fields)}",
+        valueInputOption="RAW", body=body).execute()
+    return result
 
 
 def get_table(funnel):
