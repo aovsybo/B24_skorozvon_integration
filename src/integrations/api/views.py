@@ -84,7 +84,6 @@ class DealCreationHandlerAPI(APIView):
         if (category_id in funnel_names_ids
                 and stage_id == "EXECUTING"
                 and is_unique_data(data, funnel_names_ids[category_id])):
-            send_message(is_unique_data, settings.TG_DEV_ACCOUNT)
             integration_data = get_table(funnel_names_ids[category_id])
             send_to_google_sheet(data, integration_data["sheets"])
             send_fields_message(data, integration_data["tg"])

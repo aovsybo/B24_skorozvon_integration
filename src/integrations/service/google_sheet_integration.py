@@ -55,7 +55,7 @@ def is_unique_data(fields: dict, funnel_name: str):
         if link_field[0] == funnel_name:
             table_link = link_field[2]
     funnel_table = get_table_data(get_table_url_from_link(table_link))
-    return f"{funnel_table}, {insert_data}, {insert_data in funnel_table}"
+    return insert_data not in funnel_table
 
 
 def send_to_google_sheet(fields: dict, spreadsheet_id: str):
