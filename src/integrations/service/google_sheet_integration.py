@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -9,6 +10,9 @@ from django.conf import settings
 
 
 def get_service():
+    """
+    Получам доступ к гугл таблицам
+    """
     creds = None
     if os.path.exists(settings.BASE_DIR / "token.json"):
         creds = Credentials.from_authorized_user_file(settings.BASE_DIR / "token.json", settings.SCOPES)
@@ -25,16 +29,38 @@ def get_service():
     return build('sheets', 'v4', credentials=creds)
 
 
-def get_table_data(table_link):
+def get_table_data(table_link, sheet_name):
+    """
+    Получаем данные из таблицы по ссылке и имени листа
+    """
     service = get_service()
     response = service.spreadsheets().values().get(
         spreadsheetId=table_link,
-        range="Лист1"
+        range=sheet_name
     ).execute()
     return response["values"]
 
 
+def get_funnel_info_from_integration_table():
+    """
+    Получаем данные из таблицы с интеграциями по названию интеграции
+    """
+    table = get_table_data(settings.INTEGRATIONS_SPREADSHEET_ID, settings.INTEGRATIONS_SHEET_NAME)
+    df = pd.DataFrame(table[2:], columns=table[1])
+    request_columns = [
+        'Все проекты на 13.12',
+        'ID Стадии',
+        'Ссылка на таблицу лидов [предыдущие]',
+        'Название листа',
+        'Телеграм бот:'
+    ]
+    return df[request_columns]
+
+
 def validate_data(fields: dict):
+    """
+    Приводим данные к форме для записи в гугл таблицу
+    """
     lead_type = settings.BITRIX_LEAD_TYPE[fields['lead_type']]
     lead_qualification = settings.BITRIX_LEAD_QUALIFICATION[fields['lead_qualification']]
     insert_data = [
@@ -49,24 +75,25 @@ def validate_data(fields: dict):
     return insert_data
 
 
-def is_unique_data(fields: dict, funnel_name: str):
-    insert_data = validate_data(fields)
-    links_table = get_table_data(settings.INTEGRATIONS_SPREADSHEET_ID)
-    table_link = ""
-    for link_field in links_table:
-        if link_field[0] == funnel_name:
-            table_link = link_field[2]
-    funnel_table = get_table_data(get_table_url_from_link(table_link))
+def is_unique_data(data: dict, table_link: str, sheet_name: str):
+    """
+    Проверям, нет ли таких данных, записанных в таблицу c указанным stage_id
+    """
+    insert_data = validate_data(data)
+    funnel_table = get_table_data(table_link, sheet_name)
     return insert_data not in funnel_table
 
 
-def send_to_google_sheet(fields: dict, spreadsheet_id: str):
+def send_to_google_sheet(data: dict, spreadsheet_id: str, sheet_name: str):
+    """
+    Отправляем данные в гугл таблицу по указанному айди таблицы и названию листа
+    """
     service = get_service()
     body = {
-        "values": [validate_data(fields)]
+        "values": [validate_data(data)]
     }
     result = service.spreadsheets().values().append(
-        spreadsheetId=spreadsheet_id, range=f"Лист1!1:{len(fields)}",
+        spreadsheetId=spreadsheet_id, range=f"{sheet_name}!1:{len(data)}",
         valueInputOption="RAW", body=body).execute()
     return result
 
@@ -77,20 +104,14 @@ def get_table_url_from_link(url: str):
         )[1].split("/")[0]
 
 
-def get_table(funnel):
-    table = get_table_data(settings.INTEGRATIONS_SPREADSHEET_ID)
-    integration = list(filter(lambda x: x[0] == funnel, table))
-    integration_data = {
-            "tg": "",
-            "table_link": ""
+def get_funnel_table_links(stage_id: str, integrations_table):
+    """
+    Получаем данные таблицы по ID стадии
+    """
+    # TODO: Некоторые воронки имеют более одной таблицы по айди, учесть
+    links = integrations_table.loc[integrations_table['ID Стадии'] == stage_id]
+    return {
+            "tg": links["Телеграм бот:"],
+            "table_link": get_table_url_from_link(links["Ссылка на таблицу лидов [предыдущие]"]),
+            "sheet_name": links["Название листа"],
         }
-    if integration:
-        integration_data["tg"] = integration[0][1]
-        integration_data["sheets"] = get_table_url_from_link(integration[0][2])
-    return integration_data
-
-
-def get_funnel_names():
-    table = get_table_data(settings.INTEGRATIONS_SPREADSHEET_ID)
-    funnel_names = [integration[0] for integration in table[1:]]
-    return funnel_names

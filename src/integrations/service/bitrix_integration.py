@@ -13,8 +13,7 @@ def get_deal_info(deal_id):
     response["lead_comment"] = deal["UF_CRM_1664819040131"]
     response["link_to_audio"] = deal["UF_CRM_1664819217017"]
     response["date"] = deal["CLOSEDATE"].split("T")[0]
-    stage_id = deal["STAGE_ID"].split(":")[1]
-    return response, deal["CATEGORY_ID"], stage_id
+    return response, deal["STAGE_ID"]
 
 
 def create_contact(lead_name, call_phone):
@@ -65,13 +64,3 @@ def get_category_id(category_name):
         if category["NAME"] == category_name:
             return category["ID"]
     return 0
-
-
-def get_funnel_names_ids(funnel_names):
-    response = requests.get(settings.BITRIX_GET_DEAL_CATEGORY)
-    categories = response.json()["result"]
-    funnel_names_ids = dict()
-    for category in categories:
-        if category["NAME"] in funnel_names:
-            funnel_names_ids[category["ID"]] = category["NAME"]
-    return funnel_names_ids

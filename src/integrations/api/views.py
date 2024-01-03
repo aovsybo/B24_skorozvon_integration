@@ -16,14 +16,13 @@ from integrations.service.skorozvon_integration import get_call, get_calls
 from integrations.service.bitrix_integration import (
     create_bitrix_deal,
     get_deal_info,
-    get_category_id,
-    get_funnel_names_ids
+    get_category_id
 )
 from integrations.service.google_sheet_integration import (
     send_to_google_sheet,
-    get_table,
-    get_funnel_names,
-    is_unique_data
+    get_funnel_table_links,
+    is_unique_data,
+    get_funnel_info_from_integration_table,
 )
 from integrations.service.telegram_integration import send_message, send_fields_message
 
@@ -78,19 +77,20 @@ class PhoneCallInfoAPI(APIView):
 
 class DealCreationHandlerAPI(APIView):
     def post(self, request):
-        funnel_names = get_funnel_names()
-        funnel_names_ids = get_funnel_names_ids(funnel_names)
-        data, category_id, stage_id = get_deal_info(request.data["data[FIELDS][ID]"])
-        if (category_id in funnel_names_ids
-                and stage_id == "EXECUTING"
-                and is_unique_data(data, funnel_names_ids[category_id])):
-            integration_data = get_table(funnel_names_ids[category_id])
-            send_to_google_sheet(data, integration_data["sheets"])
-            send_fields_message(data, integration_data["tg"])
+        data, stage_id = get_deal_info(request.data["data[FIELDS][ID]"])
+        integrations_table = get_funnel_info_from_integration_table()
+        # Проверяем, находится ли данная стадия воронке в списке
+        if stage_id in integrations_table['ID Стадии'].unique():
+            integration_data = get_funnel_table_links(stage_id, integrations_table)
+            if is_unique_data(data, integration_data["table_link"], integration_data["sheet_name"]):
+                send_to_google_sheet(data, integration_data["table_link"], integration_data["sheet_name"])
+                send_fields_message(data, integration_data["tg"])
         return Response(status=status.HTTP_200_OK)
 
 
 class GetCalls(APIView):
     def get(self, request):
-        calls = get_calls()
-        return Response(data={"calls": calls}, status=status.HTTP_200_OK)
+        data = dict()
+        integrations_table = get_funnel_info_from_integration_table()
+        data["links"] = get_funnel_table_links("C31:EXECUTING", integrations_table)
+        return Response(data=data, status=status.HTTP_200_OK)
