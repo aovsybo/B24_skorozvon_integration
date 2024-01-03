@@ -111,7 +111,7 @@ def get_funnel_table_links(stage_id: str, integrations_table):
     # TODO: Некоторые воронки имеют более одной таблицы по айди, учесть
     links = integrations_table.loc[integrations_table['ID Стадии'] == stage_id]
     return {
-            "tg": links["Телеграм бот:"],
-            "table_link": get_table_url_from_link(links["Ссылка на таблицу лидов [предыдущие]"]),
-            "sheet_name": links["Название листа"],
+            "tg": links["Телеграм бот:"][0].split("\n\n")[0].split(":")[1],
+            "table_link": get_table_url_from_link(links["Ссылка на таблицу лидов [предыдущие]"][0]),
+            "sheet_name": links["Название листа"][0],
         }
