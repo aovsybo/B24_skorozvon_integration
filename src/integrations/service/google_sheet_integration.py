@@ -109,9 +109,9 @@ def get_funnel_table_links(stage_id: str, integrations_table):
     Получаем данные таблицы по ID стадии
     """
     # TODO: Некоторые воронки имеют более одной таблицы по айди, учесть
-    links = integrations_table.loc[integrations_table['ID Стадии'] == stage_id]
+    links = integrations_table.loc[integrations_table['ID Стадии'] == stage_id].to_dict()
     return {
-            "tg": links["Телеграм бот:"][0].split("\n\n")[0].split(":")[1],
-            "table_link": get_table_url_from_link(links["Ссылка на таблицу лидов [предыдущие]"][0]),
-            "sheet_name": links["Название листа"][0],
+            "tg": links["Телеграм бот:"][1].split("\n\n")[0].split(":")[1].strip(),
+            "table_link": get_table_url_from_link(links["Ссылка на таблицу лидов [предыдущие]"][1]),
+            "sheet_name": links["Название листа"][1],
         }
