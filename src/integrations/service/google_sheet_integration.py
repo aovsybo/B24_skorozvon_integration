@@ -8,6 +8,7 @@ from google.oauth2.credentials import Credentials
 
 from django.conf import settings
 
+from .telegram_integration import send_message_to_dev
 
 def get_service():
     """
@@ -113,7 +114,7 @@ def get_funnel_table_links(stage_id: str, integrations_table, is_msk: bool = Fal
     count_of_integrations = len(links["Ссылка на таблицу лидов [предыдущие]"])
     index = 0
     if count_of_integrations > 1:
-        for i, sheet_name in enumerate(links["Название листа"]):
+        for i, sheet_name in links["Название листа"].items():
             # получаем нужный индекс записи по слову "МСК" если искомый лист - московский,
             # и по отстутствию слова "МСК" если искомый - по РФ
             if "МСК" in sheet_name and is_msk or "МСК" not in sheet_name and not is_msk:

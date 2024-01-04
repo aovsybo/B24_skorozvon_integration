@@ -89,5 +89,5 @@ class GetCalls(APIView):
     def get(self, request):
         data = dict()
         integrations_table = get_funnel_info_from_integration_table()
-        data["links"] = get_funnel_table_links("C1:EXECUTING", integrations_table)
+        data["links"] = get_funnel_table_links("C1:EXECUTING", integrations_table, False)
         return Response(data=data, status=status.HTTP_200_OK)
