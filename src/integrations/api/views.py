@@ -24,7 +24,11 @@ from integrations.service.google_sheet_integration import (
     is_unique_data,
     get_funnel_info_from_integration_table,
 )
-from integrations.service.telegram_integration import send_message_to_dev, send_fields_message
+from integrations.service.telegram_integration import (
+    send_message_to_dev,
+    send_fields_message,
+    send_message,
+)
 
 
 class BaseView(APIView):
@@ -76,6 +80,8 @@ class DealCreationHandlerAPI(APIView):
     def post(self, request):
         data, stage_id = get_deal_info(request.data["data[FIELDS][ID]"])
         integrations_table = get_funnel_info_from_integration_table()
+        # TODO: Все-таки сохраняем город и пишем по разному в гугл-таблицы
+        # TODO: Чат тестовый
         # Проверяем, находится ли данная стадия воронке в списке
         if stage_id in integrations_table['ID Стадии'].unique():
             integration_data = get_funnel_table_links(stage_id, integrations_table, data["is_msk"])
@@ -89,5 +95,5 @@ class GetCalls(APIView):
     def get(self, request):
         data = dict()
         integrations_table = get_funnel_info_from_integration_table()
-        data["links"] = get_funnel_table_links("C1:EXECUTING", integrations_table, False)
-        return Response(data=data, status=status.HTTP_200_OK)
+        # data["links"] = get_funnel_table_links("C1:EXECUTING", integrations_table, False)
+        return Response(data=integrations_table, status=status.HTTP_200_OK)

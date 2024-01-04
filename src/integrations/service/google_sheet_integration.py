@@ -50,12 +50,13 @@ def get_funnel_info_from_integration_table():
     df = pd.DataFrame(table[2:], columns=table[1])
     request_columns = [
         'Все проекты на 13.12',
+        'Статус',
         'ID Стадии',
         'Ссылка на таблицу лидов [предыдущие]',
         'Название листа',
         'Телеграм бот:'
     ]
-    return df[request_columns]
+    return df[df['Статус'] == 'Подключить'][request_columns]
 
 
 def validate_data(fields: dict):
@@ -109,7 +110,6 @@ def get_funnel_table_links(stage_id: str, integrations_table, is_msk: bool = Fal
     """
     Получаем данные таблицы по ID стадии
     """
-    # TODO: Некоторые воронки имеют более одной таблицы по айди, учесть
     links = integrations_table.loc[integrations_table['ID Стадии'] == stage_id].to_dict()
     count_of_integrations = len(links["Ссылка на таблицу лидов [предыдущие]"])
     index = 0
