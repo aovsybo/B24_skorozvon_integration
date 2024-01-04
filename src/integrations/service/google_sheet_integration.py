@@ -106,7 +106,7 @@ def get_table_url_from_link(url: str):
         )[1].split("/")[0]
 
 
-def get_funnel_table_links(stage_id: str, integrations_table, city: str, country: str):
+def get_funnel_table_links(stage_id: str, integrations_table, city: str):
     """
     Получаем данные таблицы по ID стадии
     """
@@ -128,5 +128,5 @@ def get_funnel_table_links(stage_id: str, integrations_table, city: str, country
         "tg": links[index]["Телеграм бот:"].split("\n\n")[0].split(":")[1].strip(),
         "table_link": get_table_url_from_link(links[index]["Ссылка на таблицу лидов [предыдущие]"]),
         # Для 15 воронки название листа соответствует названию страны
-        "sheet_name": links[index]["Название листа"] if funnel_number != "[П15]" else country,
+        "sheet_name": links[index]["Название листа"],
     }
