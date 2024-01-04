@@ -14,8 +14,12 @@ def get_deal_info(deal_id):
     response["link_to_audio"] = deal["UF_CRM_1664819217017"]
     response["date"] = deal["CLOSEDATE"].split("T")[0]
     response["city"] = ""
+    response["country"] = ""
     if "UF_CRM_1687464323171" in deal:
         response["city"] = settings.BITRIX_CITIES[deal["UF_CRM_1687464323171"]]
+    if "UF_CRM_1688409961271" in deal:
+        response["country"] = settings.BITRIX_COUNTRIES[deal["UF_CRM_1688409961271"]]
+
     return response, deal["STAGE_ID"]
 
 

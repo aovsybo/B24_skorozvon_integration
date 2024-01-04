@@ -106,14 +106,16 @@ def get_table_url_from_link(url: str):
         )[1].split("/")[0]
 
 
-def get_funnel_table_links(stage_id: str, integrations_table, city: str):
+def get_funnel_table_links(stage_id: str, integrations_table, city: str, country: str):
     """
     Получаем данные таблицы по ID стадии
     """
     links = integrations_table.loc[integrations_table['ID Стадии'] == stage_id].to_dict()
     count_of_integrations = len(links["Ссылка на таблицу лидов [предыдущие]"])
+    funnel_number = links["Все проекты на 13.12"][0].split()[0]
     index = 0
-    if count_of_integrations > 1:
+    if count_of_integrations > 1 and funnel_number == "[П5]":
+        # Если работаем с воронкой П5 где более одной записи, то имя листа получаем по городу
         for i, sheet_name in links["Название листа"].items():
             # получаем нужный индекс записи по слову "МСК" если искомый лист - московский,
             # и по отстутствию слова "МСК" если искомый - по РФ
@@ -121,8 +123,11 @@ def get_funnel_table_links(stage_id: str, integrations_table, city: str):
             if "МСК" in sheet_name and is_msk or "МСК" not in sheet_name and not is_msk:
                 index = i
                 break
-    return {
-            "tg": links["Телеграм бот:"][index].split("\n\n")[0].split(":")[1].strip(),
-            "table_link": get_table_url_from_link(links["Ссылка на таблицу лидов [предыдущие]"][index]),
-            "sheet_name": links["Название листа"][index],
-        }
+    response = {
+        "tg": links["Телеграм бот:"][index].split("\n\n")[0].split(":")[1].strip(),
+        "table_link": get_table_url_from_link(links["Ссылка на таблицу лидов [предыдущие]"][index]),
+        "sheet_name": links["Название листа"][index],
+    }
+    if funnel_number == "[П15]":
+        response["sheet_name"] = country
+    return response

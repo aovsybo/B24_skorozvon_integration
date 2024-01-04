@@ -84,9 +84,10 @@ class DealCreationHandlerAPI(APIView):
         # TODO: Пишем по-разному в гугл-таблицы
         # Проверяем, находится ли данная стадия воронке в списке
         if stage_id in integrations_table['ID Стадии'].unique():
-            integration_data = get_funnel_table_links(stage_id, integrations_table, data["city"])
+            integration_data = get_funnel_table_links(stage_id, integrations_table, data["city"], data["country"])
             if is_unique_data(data, integration_data["table_link"], integration_data["sheet_name"]):
                 send_to_google_sheet(data, integration_data["table_link"], integration_data["sheet_name"])
+                # TODO: Рассылать в нужные чаты
                 # send_fields_message(data, integration_data["tg"])
                 send_message_to_dev_chat(f"Нужный чат: {integration_data['tg']}")
                 send_fields_message(data, settings.TG_DEV_CHAT)
