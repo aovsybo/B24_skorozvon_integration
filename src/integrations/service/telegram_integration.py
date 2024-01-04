@@ -19,6 +19,13 @@ def send_fields_message(fields: dict, receiver_id: int):
     send_message(message, receiver_id)
 
 
+def send_message_to_dev(message: str):
+    send_message(
+        message,
+        settings.TG_DEV_ACCOUNT
+    )
+
+
 @bot.message_handler(commands=[])
 def send_message(message: str, receiver_id: int):
     bot.send_message(chat_id=receiver_id, text=message)

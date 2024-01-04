@@ -24,7 +24,7 @@ from integrations.service.google_sheet_integration import (
     is_unique_data,
     get_funnel_info_from_integration_table,
 )
-from integrations.service.telegram_integration import send_message, send_fields_message
+from integrations.service.telegram_integration import send_message_to_dev, send_fields_message
 
 
 class BaseView(APIView):
@@ -68,10 +68,7 @@ class PhoneCallInfoAPI(APIView):
         upload_time_minutes = int((time.time() - start_time) // 60)
         time_limit_minutes = 10
         if upload_time_minutes > time_limit_minutes:
-            send_message(
-                f"Загрузка аудиофайла по звонку {data['call_id']} составила {upload_time_minutes}.",
-                settings.TG_DEV_ACCOUNT
-            )
+            send_message_to_dev(f"Загрузка аудиофайла по звонку {data['call_id']} составила {upload_time_minutes}.")
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
