@@ -112,7 +112,8 @@ def get_funnel_table_links(stage_id: str, integrations_table, city: str, country
     """
     links = integrations_table.loc[integrations_table['ID Стадии'] == stage_id].to_dict()
     count_of_integrations = len(links["Ссылка на таблицу лидов [предыдущие]"])
-    funnel_number = links["Все проекты на 13.12"][0].split()[0]
+    funnel_number = list(links["Все проекты на 13.12"].values())[0].split()[0]
+
     index = 0
     if count_of_integrations > 1 and funnel_number == "[П5]":
         # Если работаем с воронкой П5 где более одной записи, то имя листа получаем по городу
