@@ -26,6 +26,13 @@ def send_message_to_dev(message: str):
     )
 
 
+def send_message_to_dev_chat(message: str):
+    send_message(
+        message,
+        settings.TG_DEV_CHAT
+    )
+
+
 @bot.message_handler(commands=[])
 def send_message(message: str, receiver_id: str):
     bot.send_message(chat_id=receiver_id, text=message)

@@ -75,6 +75,7 @@ INTEGRATIONS_SHEET_NAME = "таблицы проектов"
 
 TG_API_TOKEN = os.environ.get("TG_API_TOKEN")
 TG_DEV_ACCOUNT = os.environ.get("TG_DEV_ACCOUNT")
+TG_DEV_CHAT = os.environ.get("TG_DEV_CHAT")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
