@@ -78,7 +78,7 @@ class DealCreationHandlerAPI(APIView):
         integrations_table = get_funnel_info_from_integration_table()
         # Проверяем, находится ли данная стадия воронке в списке
         if stage_id in integrations_table['ID Стадии'].unique():
-            integration_data = get_funnel_table_links(stage_id, integrations_table)
+            integration_data = get_funnel_table_links(stage_id, integrations_table, data["is_msk"])
             if is_unique_data(data, integration_data["table_link"], integration_data["sheet_name"]):
                 send_to_google_sheet(data, integration_data["table_link"], integration_data["sheet_name"])
                 send_fields_message(data, integration_data["tg"])

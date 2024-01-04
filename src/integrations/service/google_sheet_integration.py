@@ -104,14 +104,23 @@ def get_table_url_from_link(url: str):
         )[1].split("/")[0]
 
 
-def get_funnel_table_links(stage_id: str, integrations_table):
+def get_funnel_table_links(stage_id: str, integrations_table, is_msk: bool = False):
     """
     Получаем данные таблицы по ID стадии
     """
     # TODO: Некоторые воронки имеют более одной таблицы по айди, учесть
     links = integrations_table.loc[integrations_table['ID Стадии'] == stage_id].to_dict()
+    count_of_integrations = len(links["Ссылка на таблицу лидов [предыдущие]"])
+    index = 0
+    if count_of_integrations > 1:
+        for i, sheet_name in enumerate(links["Название листа"]):
+            # получаем нужный индекс записи по слову "МСК" если искомый лист - московский,
+            # и по отстутствию слова "МСК" если искомый - по РФ
+            if "МСК" in sheet_name and is_msk or "МСК" not in sheet_name and not is_msk:
+                index = i
+                break
     return {
-            "tg": links["Телеграм бот:"][1].split("\n\n")[0].split(":")[1].strip(),
-            "table_link": get_table_url_from_link(links["Ссылка на таблицу лидов [предыдущие]"][1]),
-            "sheet_name": links["Название листа"][1],
+            "tg": links["Телеграм бот:"][index].split("\n\n")[0].split(":")[1].strip(),
+            "table_link": get_table_url_from_link(links["Ссылка на таблицу лидов [предыдущие]"][index]),
+            "sheet_name": links["Название листа"][index],
         }
