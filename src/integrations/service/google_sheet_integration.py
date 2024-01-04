@@ -106,7 +106,7 @@ def get_table_url_from_link(url: str):
         )[1].split("/")[0]
 
 
-def get_funnel_table_links(stage_id: str, integrations_table, is_msk: bool = False):
+def get_funnel_table_links(stage_id: str, integrations_table, city: str):
     """
     Получаем данные таблицы по ID стадии
     """
@@ -117,6 +117,7 @@ def get_funnel_table_links(stage_id: str, integrations_table, is_msk: bool = Fal
         for i, sheet_name in links["Название листа"].items():
             # получаем нужный индекс записи по слову "МСК" если искомый лист - московский,
             # и по отстутствию слова "МСК" если искомый - по РФ
+            is_msk = city == "Москва"
             if "МСК" in sheet_name and is_msk or "МСК" not in sheet_name and not is_msk:
                 index = i
                 break

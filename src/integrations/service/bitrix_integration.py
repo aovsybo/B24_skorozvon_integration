@@ -13,9 +13,9 @@ def get_deal_info(deal_id):
     response["lead_comment"] = deal["UF_CRM_1664819040131"]
     response["link_to_audio"] = deal["UF_CRM_1664819217017"]
     response["date"] = deal["CLOSEDATE"].split("T")[0]
-    response["is_msk"] = False
-    if "UF_CRM_1687464323171" in deal and deal["UF_CRM_1687464323171"] == settings.BITRIX_CITIES_MSK:
-        response["is_msk"] = True
+    response["city"] = ""
+    if "UF_CRM_1687464323171" in deal:
+        response["city"] = settings.BITRIX_CITIES[deal["UF_CRM_1687464323171"]]
     return response, deal["STAGE_ID"]
 
 
