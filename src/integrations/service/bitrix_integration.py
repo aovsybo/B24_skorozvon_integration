@@ -15,9 +15,9 @@ def get_deal_info(deal_id):
     response["date"] = deal["CLOSEDATE"].split("T")[0]
     response["city"] = ""
     response["country"] = ""
-    if "UF_CRM_1687464323171" in deal:
+    if "UF_CRM_1687464323171" in deal and deal["UF_CRM_1687464323171"]:
         response["city"] = settings.BITRIX_CITIES[deal["UF_CRM_1687464323171"]]
-    if "UF_CRM_1688409961271" in deal:
+    if "UF_CRM_1688409961271" in deal and deal["UF_CRM_1688409961271"]:
         response["country"] = settings.BITRIX_COUNTRIES[deal["UF_CRM_1688409961271"]]
 
     return response, deal["STAGE_ID"]
