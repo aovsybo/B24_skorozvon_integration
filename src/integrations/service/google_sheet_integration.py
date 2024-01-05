@@ -57,7 +57,11 @@ def get_funnel_info_from_integration_table():
         'Название листа',
         'Телеграм бот:'
     ]
-    return df[df['Статус'].isin(['Подключить', 'Подключить Приоритет 2', 'Подключить Приоритет 3'])][request_columns]
+    return df[df['Статус'].isin([
+        'Подключить',
+    #    'Подключить Приоритет 2',
+    #    'Подключить Приоритет 3'
+    ])][request_columns]
 
 
 def validate_data(fields: dict, stage_id: str):
