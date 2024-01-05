@@ -5,21 +5,45 @@ from django.conf import settings
 
 def get_deal_info(deal_id):
     deal = requests.get(settings.BITRIX_GET_DEAL_BY_ID, params={"ID": deal_id}).json()["result"]
-    response = dict()
-    response["lead_name"] = deal["UF_CRM_1664819061161"]
-    response["phone"] = deal["UF_CRM_1665719874029"]
-    response["lead_type"] = deal["UF_CRM_1664819174514"]
-    response["lead_qualification"] = deal["UF_CRM_1664819117290"]
-    response["lead_comment"] = deal["UF_CRM_1664819040131"]
-    response["link_to_audio"] = deal["UF_CRM_1664819217017"]
-    response["date"] = deal["CLOSEDATE"].split("T")[0]
-    response["city"] = ""
-    response["country"] = ""
-    if "UF_CRM_1687464323171" in deal and deal["UF_CRM_1687464323171"]:
-        response["city"] = settings.BITRIX_CITIES[deal["UF_CRM_1687464323171"]]
-    if "UF_CRM_1688409961271" in deal and deal["UF_CRM_1688409961271"]:
-        response["country"] = settings.BITRIX_COUNTRIES[deal["UF_CRM_1688409961271"]]
-
+    response = {
+        "lead_name": deal["UF_CRM_1664819061161"],
+        "phone": deal["UF_CRM_1665719874029"],
+        "lead_type": deal["UF_CRM_1664819174514"],
+        "lead_qualification": deal["UF_CRM_1664819117290"],
+        "lead_comment": deal["UF_CRM_1664819040131"],
+        "link_to_audio": deal["UF_CRM_1664819217017"],
+        "date": deal["CLOSEDATE"].split("T")[0],
+        "city": "",
+        "country": "",
+        "car_mark": "",
+        "car_model": "",
+    }
+    extra_fields = {
+        "city": {
+            "has_choices": True,
+            "code": "UF_CRM_1687464323171",
+            "id_to_name": settings.BITRIX_CITIES,
+        },
+        "country": {
+            "has_choices": True,
+            "code": "UF_CRM_1688409961271",
+            "id_to_name": settings.BITRIX_COUNTRIES,
+        },
+        "car_mark": {
+            "has_choices": False,
+            "code": "UF_CRM_1694678311862",
+        },
+        "car_model": {
+            "has_choices": False,
+            "code": "UF_CRM_1694678343732",
+        },
+    }
+    for field, info in extra_fields.items():
+        if info["code"] in deal and deal[info["code"]]:
+            if info["has_choices"]:
+                response[field] = info["id_to_name"][deal[info["code"]]]
+            else:
+                response[field] = deal[info["code"]]
     return response, deal["STAGE_ID"]
 
 

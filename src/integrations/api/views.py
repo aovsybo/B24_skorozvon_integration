@@ -6,6 +6,7 @@ from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from telebot.apihelper import ApiTelegramException
 
 from .serializers import CallInfoSerializer
 from integrations.service.yandex_disk_integration import (
@@ -82,12 +83,12 @@ class DealCreationHandlerAPI(APIView):
     def post(self, request):
         data, stage_id = get_deal_info(request.data["data[FIELDS][ID]"])
         integrations_table = get_funnel_info_from_integration_table()
-        # TODO: Пишем по-разному в гугл-таблицы
+        # TODO: П11 айдишник
         # Проверяем, находится ли данная стадия воронке в списке
         if stage_id in integrations_table['ID Стадии'].unique():
             integration_data = get_funnel_table_links(stage_id, integrations_table, data["city"])
-            if is_unique_data(data, integration_data["table_link"], integration_data["sheet_name"]):
-                send_to_google_sheet(data, integration_data["table_link"], integration_data["sheet_name"])
+            if is_unique_data(data, stage_id, integration_data["table_link"], integration_data["sheet_name"]):
+                send_to_google_sheet(data, stage_id, integration_data["table_link"], integration_data["sheet_name"])
                 # TODO: Рассылать в нужные чаты
                 # send_fields_message(data, integration_data["tg"])
                 send_message_to_dev_chat(f"Нужный чат: {integration_data['tg']}")
@@ -97,8 +98,21 @@ class DealCreationHandlerAPI(APIView):
 
 class GetCalls(APIView):
     def get(self, request):
-        data = dict()
+        data = {
+            "lead_name": "Иван",
+            "phone": "7999213414",
+            "lead_type": "49",
+            "lead_qualification": "121",
+            "lead_comment": "текст комментария.",
+            "link_to_audio": "ссылка",
+            "date": "2024-01-05",
+            "city": "",
+            "country": "Таиланд",
+            "car_mark": "",
+            "car_model": "",
+        }
+        stage_id = "C17:EXECUTING"
         integrations_table = get_funnel_info_from_integration_table()
-        data["links"] = get_funnel_table_links("C1:EXECUTING", integrations_table, "Питер", "Россия")
-        # print(get_table_data(data["links"]["table_link"], data["links"]["sheet_name"]))
+        integration_data = get_funnel_table_links(stage_id, integrations_table, data["city"])
+        send_to_google_sheet(data, stage_id, integration_data["table_link"], integration_data["sheet_name"])
         return Response(data=data, status=status.HTTP_200_OK)

@@ -77,6 +77,7 @@ BITRIX_COUNTRIES = {
     "291": "Южный Кипр",
     "433": "Индонезия"
 }
+
 SCOPES = os.environ.get("SCOPES").split(',')
 INTEGRATIONS_SPREADSHEET_ID = os.environ.get("INTEGRATIONS_SPREADSHEET_ID")
 INTEGRATIONS_SHEET_NAME = "таблицы проектов"

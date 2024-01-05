@@ -10,6 +10,7 @@ from django.conf import settings
 
 from .telegram_integration import send_message_to_dev
 
+
 def get_service():
     """
     Получам доступ к гугл таблицам
@@ -56,43 +57,77 @@ def get_funnel_info_from_integration_table():
         'Название листа',
         'Телеграм бот:'
     ]
-    return df[df['Статус'] == 'Подключить'][request_columns]
+    return df[df['Статус'].isin(['Подключить', 'Подключить Приоритет 2', 'Подключить Приоритет 3'])][request_columns]
 
 
-def validate_data(fields: dict):
+def validate_data(fields: dict, stage_id: str):
     """
     Приводим данные к форме для записи в гугл таблицу
+    Для некоторых вороноке обозначены свои формы
     """
-    lead_type = settings.BITRIX_LEAD_TYPE[fields['lead_type']]
-    lead_qualification = settings.BITRIX_LEAD_QUALIFICATION[fields['lead_qualification']]
-    insert_data = [
-        fields['date'],
-        "", ## для записи вручную
-        fields['lead_name'],
-        fields['phone'],
-        fields['lead_comment'],
-        f"{lead_type} | {lead_qualification}",
-        fields['link_to_audio'],
-    ]
+    if stage_id in ["C21:EXECUTING", "C37:EXECUTING"]:
+        # Для [П5]
+        insert_data = [
+            fields['date'],
+            "",  ## для записи вручную
+            fields['phone'],
+            fields['city'],
+            f"Имя: {fields['lead_name']}. Комментарий: {fields['lead_comment']}",
+            fields['link_to_audio'],
+        ]
+    elif stage_id == "C17:EXECUTING":
+        # Для [П15]
+        insert_data = [
+            fields['date'],
+            "",  ## для записи вручную
+            fields['phone'],
+            f"Имя: {fields['lead_name']}. Комментарий: {fields['lead_comment']}",
+            fields['link_to_audio'],
+            fields['country'],
+        ]
+    elif stage_id == "C13:EXECUTING":
+        # Для [П17]
+        insert_data = [
+            fields['date'],
+            "",  ## для записи вручную
+            fields['phone'],
+            fields['car_mark'],
+            fields['car_model'],
+            f"Имя: {fields['lead_name']}. Комментарий: {fields['lead_comment']}",
+            fields['link_to_audio'],
+        ]
+    else:
+        # Для остальных
+        lead_type = settings.BITRIX_LEAD_TYPE[fields['lead_type']]
+        lead_qualification = settings.BITRIX_LEAD_QUALIFICATION[fields['lead_qualification']]
+        insert_data = [
+            fields['date'],
+            "", ## для записи вручную
+            fields['lead_name'],
+            fields['phone'],
+            fields['lead_comment'],
+            f"{lead_type} | {lead_qualification}",
+            fields['link_to_audio'],
+        ]
     return insert_data
 
 
-def is_unique_data(data: dict, table_link: str, sheet_name: str):
+def is_unique_data(data: dict, stage_id: str, table_link: str, sheet_name: str):
     """
     Проверям, нет ли таких данных, записанных в таблицу c указанным stage_id
     """
-    insert_data = validate_data(data)
+    insert_data = validate_data(data, stage_id)
     funnel_table = get_table_data(table_link, sheet_name)
     return insert_data not in funnel_table
 
 
-def send_to_google_sheet(data: dict, spreadsheet_id: str, sheet_name: str):
+def send_to_google_sheet(data: dict, stage_id: str, spreadsheet_id: str, sheet_name: str):
     """
     Отправляем данные в гугл таблицу по указанному айди таблицы и названию листа
     """
     service = get_service()
     body = {
-        "values": [validate_data(data)]
+        "values": [validate_data(data, stage_id)]
     }
     result = service.spreadsheets().values().append(
         spreadsheetId=spreadsheet_id, range=f"{sheet_name}!1:{len(data)}",
@@ -116,7 +151,7 @@ def get_funnel_table_links(stage_id: str, integrations_table, city: str):
     index = 0
     if count_of_integrations > 1 and funnel_number == "[П5]":
         # Если работаем с воронкой П5 где более одной записи, то имя листа получаем по городу
-        for i, link in links:
+        for i, link in enumerate(links):
             # получаем нужный индекс записи по слову "МСК" если искомый лист - московский,
             # и по отстутствию слова "МСК" если искомый - по РФ
             is_msk = city == "Москва"
@@ -127,6 +162,5 @@ def get_funnel_table_links(stage_id: str, integrations_table, city: str):
     return {
         "tg": links[index]["Телеграм бот:"].split("\n\n")[0].split(":")[1].strip(),
         "table_link": get_table_url_from_link(links[index]["Ссылка на таблицу лидов [предыдущие]"]),
-        # Для 15 воронки название листа соответствует названию страны
         "sheet_name": links[index]["Название листа"],
     }
