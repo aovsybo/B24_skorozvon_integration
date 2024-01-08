@@ -7,11 +7,15 @@ def convert_date_to_ru(date: str):
     return ".".join(date.split("T")[0].split("-")[::-1])
 
 
+def unify_phone(phone: str):
+    return f"+7{phone[::-1][:10][::-1]}"
+
+
 def get_deal_info(deal_id):
     deal = requests.get(settings.BITRIX_GET_DEAL_BY_ID, params={"ID": deal_id}).json()["result"]
     response = {
         "lead_name": deal["UF_CRM_1664819061161"],
-        "phone": deal["UF_CRM_1665719874029"],
+        "phone": unify_phone(deal["UF_CRM_1665719874029"]),
         "lead_type": deal["UF_CRM_1664819174514"],
         "lead_qualification": deal["UF_CRM_1664819117290"],
         "lead_comment": deal["UF_CRM_1664819040131"],
