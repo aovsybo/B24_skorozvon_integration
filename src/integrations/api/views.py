@@ -34,6 +34,9 @@ from integrations.service.telegram_integration import (
 )
 
 
+CURRENT_DEALS = []
+
+
 class BaseView(APIView):
     def get(self, request):
         return Response(data={"message": "ok"}, status=status.HTTP_200_OK)
@@ -81,8 +84,11 @@ class PhoneCallInfoAPI(APIView):
 
 class DealCreationHandlerAPI(APIView):
     def post(self, request):
-        if request.data["auth[application_token]"] != settings.BITRIX_APP_TOKEN:
-            return
+        deal_id = request.data["data[FIELDS][ID]"]
+        if request.data["auth[application_token]"] != settings.BITRIX_APP_TOKEN or deal_id in CURRENT_DEALS:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        else:
+            CURRENT_DEALS.append(request.data["data[FIELDS][ID]"])
         data, stage_id = get_deal_info(request.data["data[FIELDS][ID]"])
         integrations_table = get_funnel_info_from_integration_table()
         # Проверяем, находится ли данная стадия воронке в списке
@@ -92,6 +98,7 @@ class DealCreationHandlerAPI(APIView):
             if is_unique_data(data, stage_id, integration_data["table_link"], integration_data["sheet_name"]):
                 send_to_google_sheet(data, stage_id, integration_data["table_link"], integration_data["sheet_name"])
                 send_fields_message(data, integration_data["tg"])
+        CURRENT_DEALS.remove(deal_id)
         return Response(status=status.HTTP_200_OK)
 
 
