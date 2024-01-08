@@ -3,6 +3,10 @@ import requests
 from django.conf import settings
 
 
+def convert_date_to_ru(date: str):
+    return ".".join(date.split("T")[0].split("-")[::-1])
+
+
 def get_deal_info(deal_id):
     deal = requests.get(settings.BITRIX_GET_DEAL_BY_ID, params={"ID": deal_id}).json()["result"]
     response = {
@@ -12,7 +16,7 @@ def get_deal_info(deal_id):
         "lead_qualification": deal["UF_CRM_1664819117290"],
         "lead_comment": deal["UF_CRM_1664819040131"],
         "link_to_audio": deal["UF_CRM_1664819217017"],
-        "date": deal["DATE_MODIFY"].split("T")[0],
+        "date": deal["DATE_MODIFY"],
         "city": "",
         "country": "",
         "car_mark": "",
