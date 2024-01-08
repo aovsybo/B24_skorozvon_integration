@@ -16,7 +16,7 @@ def get_deal_info(deal_id):
         "lead_qualification": deal["UF_CRM_1664819117290"],
         "lead_comment": deal["UF_CRM_1664819040131"],
         "link_to_audio": deal["UF_CRM_1664819217017"],
-        "date": deal["DATE_MODIFY"],
+        "date": convert_date_to_ru(deal["DATE_MODIFY"]),
         "city": "",
         "country": "",
         "car_mark": "",
