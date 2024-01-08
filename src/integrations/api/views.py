@@ -81,6 +81,8 @@ class PhoneCallInfoAPI(APIView):
 
 class DealCreationHandlerAPI(APIView):
     def post(self, request):
+        if request.data["auth[application_token]"] != settings.BITRIX_APP_TOKEN:
+            return
         data, stage_id = get_deal_info(request.data["data[FIELDS][ID]"])
         integrations_table = get_funnel_info_from_integration_table()
         # Проверяем, находится ли данная стадия воронке в списке
