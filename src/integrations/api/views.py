@@ -85,6 +85,8 @@ class PhoneCallInfoAPI(APIView):
 class DealCreationHandlerAPI(APIView):
     def post(self, request):
         deal_id = request.data["data[FIELDS][ID]"]
+        # Проверяем соответствие передаваемого ключа и ключа битрикса
+        # А также проверяем, не идет ли уже работа по данной сделке, чтобы не отправлять два раза на случай дубля
         if request.data["auth[application_token]"] != settings.BITRIX_APP_TOKEN or deal_id in CURRENT_DEALS:
             return Response(status=status.HTTP_403_FORBIDDEN)
         else:
@@ -92,7 +94,6 @@ class DealCreationHandlerAPI(APIView):
         data, stage_id = get_deal_info(request.data["data[FIELDS][ID]"])
         integrations_table = get_funnel_info_from_integration_table()
         # Проверяем, находится ли данная стадия воронке в списке
-        # TODO: Дубли
         if stage_id in integrations_table['ID Стадии'].unique():
             integration_data = get_funnel_table_links(stage_id, integrations_table, data["city"])
             if is_unique_data(data, stage_id, integration_data["table_link"], integration_data["sheet_name"]):
