@@ -84,6 +84,7 @@ class DealCreationHandlerAPI(APIView):
         data, stage_id = get_deal_info(request.data["data[FIELDS][ID]"])
         integrations_table = get_funnel_info_from_integration_table()
         # Проверяем, находится ли данная стадия воронке в списке
+        # TODO: Дубли
         if stage_id in integrations_table['ID Стадии'].unique():
             integration_data = get_funnel_table_links(stage_id, integrations_table, data["city"])
             if is_unique_data(data, stage_id, integration_data["table_link"], integration_data["sheet_name"]):
