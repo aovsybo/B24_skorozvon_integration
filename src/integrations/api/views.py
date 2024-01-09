@@ -19,20 +19,17 @@ from integrations.service.skorozvon_integration import (
 from integrations.service.bitrix_integration import (
     create_bitrix_deal,
     get_deal_info,
-    get_category_id
+    get_category_id,
 )
 from integrations.service.google_sheet_integration import (
     send_to_google_sheet,
     get_funnel_table_links,
     is_unique_data,
-    get_table_data,
     get_funnel_info_from_integration_table,
 )
 from integrations.service.telegram_integration import (
     send_message_to_dev,
-    send_message_to_dev_chat,
     send_fields_message,
-    send_message,
 )
 
 
@@ -113,5 +110,4 @@ class DealCreationHandlerAPI(APIView):
 class GetCalls(APIView):
     def get(self, request):
         data = dict()
-        data["calls"] = get_calls()
         return Response(data=data, status=status.HTTP_200_OK)

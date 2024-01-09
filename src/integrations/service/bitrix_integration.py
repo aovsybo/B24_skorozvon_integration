@@ -13,6 +13,7 @@ def unify_phone(phone: str):
         return f"7{phone[::-1][:10][::-1]}"
     return phone
 
+
 def get_deal_info(deal_id):
     deal = requests.get(settings.BITRIX_GET_DEAL_BY_ID, params={"ID": deal_id}).json()["result"]
     response = {
@@ -71,10 +72,30 @@ def create_contact(lead_name, call_phone):
         return {"status": "failed"}
 
 
+# def get_deals_list_by_filters(funnel_name: str, phone: str):
+#     params = dict()
+#     select_fields = [
+#         # "NAME",
+#         # "STAGE_ID",
+#         # "TITLE",
+#         # "CONTACT_ID",
+#     ]
+#     for i, field in enumerate(select_fields):
+#         params[f"SELECT[{i}]"] = field
+#     filter_fields = {
+#         "STAGE_ID": funnel_name
+#     }
+#     for field, value in filter_fields.items():
+#         params[f"FILTER[{field}]"] = value
+#     return requests.get(url=settings.BITRIX_GET_DEALS_LIST, params=params).json()["result"]
+
+
+def get_contacts_list():
+    return requests.get(url=settings.BITRIX_GET_LIST_OF_CONTACTS).json()["result"]
+
+
 def get_or_create_contact_id(lead_name, call_phone):
-    response = requests.get(url=settings.BITRIX_GET_LIST_OF_CONTACTS)
-    contacts = response.json()["result"]
-    # filter(lambda person: person['name'] == 'Pam', people)
+    contacts = get_contacts_list()
     create_contact(lead_name, call_phone)
     current_contact = max(contacts, key=lambda x: x["ID"])
     return current_contact["ID"]
