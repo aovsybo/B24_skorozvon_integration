@@ -31,6 +31,13 @@ def get_calls():
     headers = {
         "Authorization": token
     }
+    print(headers)
+
+    params = {
+        "page": 3,
+        "length": 100,
+        "sort_by_time": True
+    }
     url = f"https://app.skorozvon.ru/api/v2/calls/"
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, params=params)
     return response.json()

@@ -140,9 +140,7 @@ def send_to_google_sheet(data: dict, stage_id: str, spreadsheet_id: str, sheet_n
 
 
 def get_table_url_from_link(url: str):
-    return url.split(
-            "https://docs.google.com/spreadsheets/d/"
-        )[1].split("/")[0]
+    return url.split("https://docs.google.com/spreadsheets/d/")[1].split("/")[0]
 
 
 def get_funnel_table_links(stage_id: str, integrations_table, city: str):

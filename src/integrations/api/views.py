@@ -46,6 +46,7 @@ class BaseView(APIView):
 
 class PhoneCallInfoAPI(APIView):
     def post(self, request):
+        # Берем необходимые данные из запроса
         data = {
             "organisation_name": request.data["lead"]["name"],
             "organisation_phone": request.data["call"]["phone"],
@@ -55,10 +56,11 @@ class PhoneCallInfoAPI(APIView):
         }
         deal_name = f"{request.data['call_result']['result_name']} {request.data['call_result']['result_id']}"
         start_time = time.time()
+        # Сохраняем в БД данные пришедшие с запросом
         serializer = CallInfoSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-
+        # Загружаем запись на яндекс.диск и получаем ссылку
         call_content = get_call(data["call_id"])
         date_string = datetime.now().strftime("%d%m%Y%H%M%S")
         file_name = f"call_audio_{data['call_id']}_{date_string}.mp3"
@@ -67,7 +69,8 @@ class PhoneCallInfoAPI(APIView):
         upload_to_disk(settings.BASE_DIR, file_name)
         os.remove(f"{settings.BASE_DIR}/{file_name}")
         yandex_disk_link = get_file_share_link(file_name)
-        category_name = "[П44] ТЕСТ ИНТЕГРАЦИЙ" # Заменить
+        # Создаем сделку в битриксе
+        category_name = "[П44] ТЕСТ ИНТЕГРАЦИЙ"
         category_id = get_category_id(category_name)
         create_bitrix_deal(
             deal_name,
@@ -77,6 +80,8 @@ class PhoneCallInfoAPI(APIView):
             yandex_disk_link,
             category_id,
         )
+        # Проверяем что весь процесс занял менее 10 минут
+        # TODO: сделать через декоратор
         upload_time_minutes = int((time.time() - start_time) // 60)
         time_limit_minutes = 10
         if upload_time_minutes > time_limit_minutes:

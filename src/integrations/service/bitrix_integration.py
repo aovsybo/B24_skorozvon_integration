@@ -8,8 +8,10 @@ def convert_date_to_ru(date: str):
 
 
 def unify_phone(phone: str):
-    return f"+7{phone[::-1][:10][::-1]}"
-
+    # Приводим номер к единому формату
+    if phone:
+        return f"7{phone[::-1][:10][::-1]}"
+    return phone
 
 def get_deal_info(deal_id):
     deal = requests.get(settings.BITRIX_GET_DEAL_BY_ID, params={"ID": deal_id}).json()["result"]
