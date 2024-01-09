@@ -116,13 +116,17 @@ def validate_data(fields: dict, stage_id: str):
     return insert_data
 
 
-def is_unique_data(data: dict, stage_id: str, table_link: str, sheet_name: str):
+def is_unique_data(data: dict, stage_id: str, table_link: str, sheet_name: str, previous_years_sheet_names: list[str]):
     """
     Проверям, нет ли таких данных, записанных в таблицу c указанным stage_id
     """
     insert_data = validate_data(data, stage_id)
-    funnel_table = get_table_data(table_link, sheet_name)
-    return insert_data not in funnel_table
+    all_sheet_names = [sheet_name] + previous_years_sheet_names
+    for sheet_name in all_sheet_names:
+        funnel_table = get_table_data(table_link, sheet_name)
+        if insert_data in funnel_table:
+            return False
+    return True
 
 
 def send_to_google_sheet(data: dict, stage_id: str, spreadsheet_id: str, sheet_name: str):
@@ -165,4 +169,6 @@ def get_funnel_table_links(stage_id: str, integrations_table, city: str):
         "tg": links[index]["Телеграм бот:"].split("\n\n")[0].split(":")[1].strip(),
         "table_link": get_table_url_from_link(links[index]["Ссылка на таблицу лидов [предыдущие]"]),
         "sheet_name": links[index]["Название листа"],
+        # "previous_years_sheet_names": links[index]["Предыдущие года"],
+        "previous_years_sheet_names": [],
     }
