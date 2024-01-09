@@ -6,14 +6,16 @@ from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from telebot.apihelper import ApiTelegramException
 
 from .serializers import CallInfoSerializer
 from integrations.service.yandex_disk_integration import (
     upload_to_disk,
     get_file_share_link
 )
-from integrations.service.skorozvon_integration import get_call, get_calls
+from integrations.service.skorozvon_integration import (
+    get_call,
+    get_calls
+)
 from integrations.service.bitrix_integration import (
     create_bitrix_deal,
     get_deal_info,
@@ -105,21 +107,6 @@ class DealCreationHandlerAPI(APIView):
 
 class GetCalls(APIView):
     def get(self, request):
-        data = {
-            "lead_name": "Иван",
-            "phone": "7999213414",
-            "lead_type": "49",
-            "lead_qualification": "121",
-            "lead_comment": "текст комментария.",
-            "link_to_audio": "ссылка",
-            "date": "2024-01-05",
-            "city": "",
-            "country": "Таиланд",
-            "car_mark": "",
-            "car_model": "",
-        }
-        stage_id = "C17:EXECUTING"
-        integrations_table = get_funnel_info_from_integration_table()
-        integration_data = get_funnel_table_links(stage_id, integrations_table, data["city"])
-        send_to_google_sheet(data, stage_id, integration_data["table_link"], integration_data["sheet_name"])
+        data = dict()
+        data["calls"] = get_calls()
         return Response(data=data, status=status.HTTP_200_OK)

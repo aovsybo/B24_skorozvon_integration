@@ -13,7 +13,7 @@ def send_fields_message(fields: dict, receiver_id: str):
 Имя: {fields['lead_name']};\n
 Телефон: {fields['phone']};\n
 Комментарий: {fields['lead_comment']};\n
-Доп. комментарии: {lead_type} | {lead_qualification};\n
+Доп. комментарий: {lead_type} | {lead_qualification};\n
 Ссылка на запись: {fields['link_to_audio']};\n
 Дата лида: {fields['date']};"""
     send_message(message, receiver_id)
