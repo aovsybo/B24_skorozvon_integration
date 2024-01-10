@@ -20,7 +20,7 @@ from integrations.service.bitrix_integration import (
     create_bitrix_deal,
     get_deal_info,
     get_category_id,
-    get_id_for_doubles_stage,
+    move_deal_to_doubles_stage,
 )
 from integrations.service.google_sheet_integration import (
     send_to_google_sheet,
@@ -116,6 +116,8 @@ class DealCreationHandlerAPI(APIView):
                     integration_data["sheet_name"],
                 )
                 send_message_to_tg(data, integration_data["tg"])
+            else:
+                move_deal_to_doubles_stage(deal_id, stage_id)
         CURRENT_DEALS.remove(deal_id)
         return Response(status=status.HTTP_200_OK)
 
@@ -123,6 +125,4 @@ class DealCreationHandlerAPI(APIView):
 class GetCalls(APIView):
     def get(self, request):
         data = dict()
-        stage_id = "C94:EXECUTING"
-        data[stage_id] = get_id_for_doubles_stage(stage_id)
         return Response(data=data, status=status.HTTP_200_OK)

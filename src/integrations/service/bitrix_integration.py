@@ -27,6 +27,16 @@ def get_id_for_doubles_stage(stage_id: str):
         return -1
 
 
+def move_deal_to_doubles_stage(deal_id: str, stage_id: str):
+    doubles_id = get_id_for_doubles_stage(stage_id)
+    if doubles_id == -1:
+        return
+    requests.get(
+        settings.BITRIX_UPDATE_DEAL,
+        params={"ID": deal_id, "FIELDS[STAGE_ID]": doubles_id}
+    )
+
+
 def get_deal_info(deal_id):
     deal = requests.get(settings.BITRIX_GET_DEAL_BY_ID, params={"ID": deal_id}).json()["result"]
     response = {
