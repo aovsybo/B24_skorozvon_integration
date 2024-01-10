@@ -55,6 +55,7 @@ def get_funnel_info_from_integration_table():
         'ID Стадии',
         'Ссылка на таблицу лидов [предыдущие]',
         'Название листа',
+        'Названия прошлых листов',
         'Телеграм бот:'
     ]
     return df[df['Статус'].isin([
@@ -116,15 +117,23 @@ def validate_data(fields: dict, stage_id: str):
     return insert_data
 
 
-def is_unique_data(data: dict, stage_id: str, table_link: str, sheet_name: str, previous_years_sheet_names: list[str]):
+def is_unique_data(phone: str, table_link: str, sheet_name: str, previous_sheet_names: list[str]):
     """
-    Проверям, нет ли таких данных, записанных в таблицу c указанным stage_id
+    Проверям, нет ли лида с таким номером в листах данной таблицы
     """
-    insert_data = validate_data(data, stage_id)
-    all_sheet_names = [sheet_name] + previous_years_sheet_names
+    all_sheet_names = [sheet_name] + previous_sheet_names
+
+    phone_id = -1
     for sheet_name in all_sheet_names:
         funnel_table = get_table_data(table_link, sheet_name)
-        if insert_data in funnel_table:
+        for field_name in funnel_table[0]:
+            if field_name in settings.PHONE_FIELD_NAMES:
+                phone_id = funnel_table[0].index(field_name)
+                break
+        if phone_id == -1:
+            send_message_to_dev(f"Не найдено поле с телефоном в таблице {table_link}")
+            return True
+        if phone in [deal_info[phone_id] for deal_info in funnel_table[1:]]:
             return False
     return True
 
@@ -165,10 +174,12 @@ def get_funnel_table_links(stage_id: str, integrations_table, city: str):
             if "МСК" in sheet_name and is_msk or "МСК" not in sheet_name and not is_msk:
                 index = i
                 break
+    previous_sheet_names = []
+    if links[index]["Названия прошлых листов"]:
+        previous_sheet_names = links[index]["Названия прошлых листов"].split(', ')
     return {
         "tg": links[index]["Телеграм бот:"].split("\n\n")[0].split(":")[1].strip(),
         "table_link": get_table_url_from_link(links[index]["Ссылка на таблицу лидов [предыдущие]"]),
         "sheet_name": links[index]["Название листа"],
-        # "previous_years_sheet_names": links[index]["Предыдущие года"],
-        "previous_years_sheet_names": [],
+        "previous_sheet_names": previous_sheet_names,
     }

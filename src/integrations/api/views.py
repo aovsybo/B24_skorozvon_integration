@@ -105,7 +105,7 @@ class DealCreationHandlerAPI(APIView):
                     stage_id,
                     integration_data["table_link"],
                     integration_data["sheet_name"],
-                    integration_data["previous_years_sheet_names"]
+                    integration_data["previous_sheet_names"]
             ):
                 send_to_google_sheet(data, stage_id, integration_data["table_link"], integration_data["sheet_name"])
                 send_message_to_tg(data, integration_data["tg"])
@@ -116,4 +116,13 @@ class DealCreationHandlerAPI(APIView):
 class GetCalls(APIView):
     def get(self, request):
         data = dict()
+        stage_id = "C94:EXECUTING"
+        integrations_table = get_funnel_info_from_integration_table()
+        integration_data = get_funnel_table_links(stage_id, integrations_table, "")
+        data["is_unique"] = is_unique_data(
+            "71111111111",
+            integration_data["table_link"],
+            integration_data["sheet_name"],
+            integration_data["previous_sheet_names"]
+        )
         return Response(data=data, status=status.HTTP_200_OK)

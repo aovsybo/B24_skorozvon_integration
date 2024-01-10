@@ -85,6 +85,7 @@ BITRIX_COUNTRIES = {
 SCOPES = os.environ.get("SCOPES").split(',')
 INTEGRATIONS_SPREADSHEET_ID = os.environ.get("INTEGRATIONS_SPREADSHEET_ID")
 INTEGRATIONS_SHEET_NAME = "таблицы проектов"
+PHONE_FIELD_NAMES = ["Тел", "Номер абонента", "Телефон Лида", "Номер", "Телефон"]
 
 TG_API_TOKEN = os.environ.get("TG_API_TOKEN")
 TG_DEV_ACCOUNT = os.environ.get("TG_DEV_ACCOUNT")
