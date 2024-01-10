@@ -137,13 +137,11 @@ def is_unique_data(phone: str, table_link: str, sheet_name: str, previous_sheet_
     return True
 
 
-def send_to_google_sheet(data: dict, stage_id: str, spreadsheet_id: str, sheet_name: str, is_double: bool):
+def send_to_google_sheet(data: dict, stage_id: str, spreadsheet_id: str, sheet_name: str):
     """
     Отправляем данные в гугл таблицу по указанному айди таблицы и названию листа
     """
     service = get_service()
-    if is_double:
-        data["phone"] = "Дубль " + data["phone"]
     body = {
         "values": [validate_data(data, stage_id)]
     }

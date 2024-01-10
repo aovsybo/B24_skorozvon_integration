@@ -110,7 +110,7 @@ class DealCreationHandlerAPI(APIView):
                     integration_data["previous_sheet_names"]
             ):
                 send_to_google_sheet(
-                    data.copy(),
+                    data,
                     stage_id,
                     integration_data["table_link"],
                     integration_data["sheet_name"],
