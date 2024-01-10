@@ -101,15 +101,22 @@ class DealCreationHandlerAPI(APIView):
         # Проверяем, находится ли данная стадия воронке в списке
         if stage_id in integrations_table['ID Стадии'].unique():
             integration_data = get_funnel_table_links(stage_id, integrations_table, data["city"])
+            is_double = False
             if not is_unique_data(
                     data["phone"],
                     integration_data["table_link"],
                     integration_data["sheet_name"],
                     integration_data["previous_sheet_names"]
             ):
-                data["lead_name"] = f"(Дубль) {data['lead_name']}"
-            send_to_google_sheet(data, stage_id, integration_data["table_link"], integration_data["sheet_name"])
-            send_message_to_tg(data, integration_data["tg"])
+                is_double = True
+            send_to_google_sheet(
+                data,
+                stage_id,
+                integration_data["table_link"],
+                integration_data["sheet_name"],
+                is_double
+            )
+            send_message_to_tg(data, integration_data["tg"], is_double)
         CURRENT_DEALS.remove(deal_id)
         return Response(status=status.HTTP_200_OK)
 
