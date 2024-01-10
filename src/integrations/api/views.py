@@ -110,7 +110,7 @@ class DealCreationHandlerAPI(APIView):
             ):
                 is_double = True
             send_to_google_sheet(
-                data,
+                data.copy(),
                 stage_id,
                 integration_data["table_link"],
                 integration_data["sheet_name"],
