@@ -122,10 +122,9 @@ def is_unique_data(phone: str, table_link: str, sheet_name: str, previous_sheet_
     Проверям, нет ли лида с таким номером в листах данной таблицы
     """
     all_sheet_names = [sheet_name] + previous_sheet_names
-
     phone_id = -1
-    for sheet_name in all_sheet_names:
-        funnel_table = get_table_data(table_link, sheet_name)
+    for current_sheet_name in all_sheet_names:
+        funnel_table = get_table_data(table_link, current_sheet_name)
         for field_name in funnel_table[0]:
             if field_name in settings.PHONE_FIELD_NAMES:
                 phone_id = funnel_table[0].index(field_name)
@@ -133,7 +132,7 @@ def is_unique_data(phone: str, table_link: str, sheet_name: str, previous_sheet_
         if phone_id == -1:
             send_message_to_dev(f"Не найдено поле с телефоном в таблице {table_link}")
             return True
-        if phone in [deal_info[phone_id] for deal_info in funnel_table[1:]]:
+        if phone in [deal_info[phone_id].strip() for deal_info in funnel_table[1:] if deal_info]:
             return False
     return True
 

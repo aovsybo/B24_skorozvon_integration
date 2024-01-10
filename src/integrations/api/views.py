@@ -88,6 +88,7 @@ class PhoneCallInfoAPI(APIView):
 
 class DealCreationHandlerAPI(APIView):
     def post(self, request):
+        # TODO: token update
         deal_id = request.data["data[FIELDS][ID]"]
         # Проверяем соответствие передаваемого ключа и ключа битрикса
         # А также проверяем, не идет ли уже работа по данной сделке, чтобы не отправлять два раза на случай дубля
@@ -101,8 +102,7 @@ class DealCreationHandlerAPI(APIView):
         if stage_id in integrations_table['ID Стадии'].unique():
             integration_data = get_funnel_table_links(stage_id, integrations_table, data["city"])
             if is_unique_data(
-                    data,
-                    stage_id,
+                    data["phone"],
                     integration_data["table_link"],
                     integration_data["sheet_name"],
                     integration_data["previous_sheet_names"]
@@ -116,13 +116,15 @@ class DealCreationHandlerAPI(APIView):
 class GetCalls(APIView):
     def get(self, request):
         data = dict()
-        stage_id = "C94:EXECUTING"
+        stage_id = "C21:EXECUTING"
         integrations_table = get_funnel_info_from_integration_table()
-        integration_data = get_funnel_table_links(stage_id, integrations_table, "")
-        data["is_unique"] = is_unique_data(
-            "71111111111",
-            integration_data["table_link"],
-            integration_data["sheet_name"],
-            integration_data["previous_sheet_names"]
-        )
+        integration_data = get_funnel_table_links(stage_id, integrations_table, "Воронеж")
+        nums = ["79995280965"]
+        for num in nums:
+            data[num] = is_unique_data(
+                num,
+                integration_data["table_link"],
+                integration_data["sheet_name"],
+                integration_data["previous_sheet_names"]
+            )
         return Response(data=data, status=status.HTTP_200_OK)

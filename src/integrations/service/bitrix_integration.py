@@ -72,24 +72,6 @@ def create_contact(lead_name, call_phone):
         return {"status": "failed"}
 
 
-# def get_deals_list_by_filters(funnel_name: str, phone: str):
-#     params = dict()
-#     select_fields = [
-#         # "NAME",
-#         # "STAGE_ID",
-#         # "TITLE",
-#         # "CONTACT_ID",
-#     ]
-#     for i, field in enumerate(select_fields):
-#         params[f"SELECT[{i}]"] = field
-#     filter_fields = {
-#         "STAGE_ID": funnel_name
-#     }
-#     for field, value in filter_fields.items():
-#         params[f"FILTER[{field}]"] = value
-#     return requests.get(url=settings.BITRIX_GET_DEALS_LIST, params=params).json()["result"]
-
-
 def get_contacts_list():
     return requests.get(url=settings.BITRIX_GET_LIST_OF_CONTACTS).json()["result"]
 
