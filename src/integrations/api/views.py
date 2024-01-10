@@ -20,11 +20,13 @@ from integrations.service.bitrix_integration import (
     create_bitrix_deal,
     get_deal_info,
     get_category_id,
+    get_id_for_doubles_stage,
 )
 from integrations.service.google_sheet_integration import (
     send_to_google_sheet,
     get_funnel_table_links,
     is_unique_data,
+    is_copy_data,
     get_funnel_info_from_integration_table,
 )
 from integrations.service.telegram_integration import (
@@ -101,6 +103,14 @@ class DealCreationHandlerAPI(APIView):
         # Проверяем, находится ли данная стадия воронке в списке
         if stage_id in integrations_table['ID Стадии'].unique():
             integration_data = get_funnel_table_links(stage_id, integrations_table, data["city"])
+            if is_copy_data(
+                data,
+                stage_id,
+                integration_data["table_link"],
+                integration_data["sheet_name"],
+                integration_data["previous_sheet_names"]
+            ):
+                return Response(status=status.HTTP_400_BAD_REQUEST)
             is_double = False
             if not is_unique_data(
                     data["phone"],
@@ -124,15 +134,6 @@ class DealCreationHandlerAPI(APIView):
 class GetCalls(APIView):
     def get(self, request):
         data = dict()
-        stage_id = "C21:EXECUTING"
-        integrations_table = get_funnel_info_from_integration_table()
-        integration_data = get_funnel_table_links(stage_id, integrations_table, "Воронеж")
-        nums = ["79995280965"]
-        for num in nums:
-            data[num] = is_unique_data(
-                num,
-                integration_data["table_link"],
-                integration_data["sheet_name"],
-                integration_data["previous_sheet_names"]
-            )
+        stage_id = "C94:EXECUTING"
+        data[stage_id] = get_id_for_doubles_stage(stage_id)
         return Response(data=data, status=status.HTTP_200_OK)

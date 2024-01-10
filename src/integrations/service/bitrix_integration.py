@@ -14,6 +14,19 @@ def unify_phone(phone: str):
     return phone
 
 
+def get_id_for_doubles_stage(stage_id: str):
+    if ":" in stage_id:
+        funnel_id = stage_id.split(":")[0].strip("C")
+    else:
+        funnel_id = stage_id
+    stages = requests.get(settings.BITRIX_GET_DEAL_CATEGORY_STAGES_LIST, params={"ID": funnel_id}).json()["result"]
+    doubles_id = [stage["STATUS_ID"] for stage in stages if stage["NAME"] == "Дубли"]
+    if doubles_id:
+        return doubles_id[0]
+    else:
+        return -1
+
+
 def get_deal_info(deal_id):
     deal = requests.get(settings.BITRIX_GET_DEAL_BY_ID, params={"ID": deal_id}).json()["result"]
     response = {
