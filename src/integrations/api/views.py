@@ -103,6 +103,7 @@ class DealCreationHandlerAPI(APIView):
         # Проверяем, находится ли данная стадия воронке в списке
         if stage_id in integrations_table['ID Стадии'].unique():
             integration_data = get_funnel_table_links(stage_id, integrations_table, data["city"])
+            # Проверяем, не является ли сделка полной копией
             if is_copy_data(
                 data,
                 stage_id,
@@ -111,14 +112,13 @@ class DealCreationHandlerAPI(APIView):
                 integration_data["previous_sheet_names"]
             ):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
-            is_double = False
-            if not is_unique_data(
+            # Проверяем, не является ли сделка дублем по номеру
+            is_double = not is_unique_data(
                     data["phone"],
                     integration_data["table_link"],
                     integration_data["sheet_name"],
                     integration_data["previous_sheet_names"]
-            ):
-                is_double = True
+            )
             send_to_google_sheet(
                 data.copy(),
                 stage_id,
