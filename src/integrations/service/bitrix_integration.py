@@ -115,7 +115,7 @@ def create_bitrix_deal(deal_name, lead_name, call_phone, lead_comment, share_lin
 
 
 def get_category_id(category_name):
-    response = requests.get(settings.BITRIX_GET_DEAL_CATEGORY)
+    response = requests.get(settings.BITRIX_GET_DEAL_CATEGORY_LIST)
     categories = response.json()["result"]
     for category in categories:
         if category["NAME"] == category_name:

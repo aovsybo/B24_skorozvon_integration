@@ -117,16 +117,6 @@ def validate_data(fields: dict, stage_id: str):
     return insert_data
 
 
-def is_copy_data(data: dict, stage_id: str, table_link: str, sheet_name: str, previous_sheet_names: list[str]):
-    insert_data = validate_data(data, stage_id)
-    all_sheet_names = [sheet_name] + previous_sheet_names
-    for current_sheet_name in all_sheet_names:
-        funnel_table = get_table_data(table_link, current_sheet_name)
-        if insert_data in funnel_table:
-            return True
-    return False
-
-
 def is_unique_data(phone: str, table_link: str, sheet_name: str, previous_sheet_names: list[str]):
     """
     Проверям, нет ли лида с таким номером в листах данной таблицы
