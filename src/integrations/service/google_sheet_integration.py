@@ -139,7 +139,7 @@ def send_to_google_sheet(data: dict, stage_id: str, spreadsheet_id: str, sheet_n
     }
     result = service.spreadsheets().values().append(
         spreadsheetId=spreadsheet_id, range=f"{sheet_name}!1:{len(data)}",
-        valueInputOption="RAW", body=body).execute()
+        valueInputOption="USER_ENTERED", body=body).execute()
     return result
 
 

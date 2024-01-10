@@ -6,7 +6,7 @@ from django.conf import settings
 bot = telebot.TeleBot(settings.TG_API_TOKEN)
 
 
-def send_fields_message(fields: dict, receiver_id: str):
+def send_message_to_tg(fields: dict, receiver_id: str):
     lead_type = settings.BITRIX_LEAD_TYPE[fields['lead_type']]
     lead_qualification = settings.BITRIX_LEAD_QUALIFICATION[fields['lead_qualification']]
     message = f"""Новый лид: {fields['lead_name']}_{fields['phone']};\n

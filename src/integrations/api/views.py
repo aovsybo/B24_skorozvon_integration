@@ -29,7 +29,7 @@ from integrations.service.google_sheet_integration import (
 )
 from integrations.service.telegram_integration import (
     send_message_to_dev,
-    send_fields_message,
+    send_message_to_tg,
 )
 
 
@@ -108,7 +108,7 @@ class DealCreationHandlerAPI(APIView):
                     integration_data["previous_years_sheet_names"]
             ):
                 send_to_google_sheet(data, stage_id, integration_data["table_link"], integration_data["sheet_name"])
-                send_fields_message(data, integration_data["tg"])
+                send_message_to_tg(data, integration_data["tg"])
         CURRENT_DEALS.remove(deal_id)
         return Response(status=status.HTTP_200_OK)
 
