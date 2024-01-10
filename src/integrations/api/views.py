@@ -107,7 +107,7 @@ class DealCreationHandlerAPI(APIView):
                     integration_data["sheet_name"],
                     integration_data["previous_sheet_names"]
             ):
-                data["lead_name"] += f"(Дубль) {data['lead_name']}"
+                data["lead_name"] = f"(Дубль) {data['lead_name']}"
             send_to_google_sheet(data, stage_id, integration_data["table_link"], integration_data["sheet_name"])
             send_message_to_tg(data, integration_data["tg"])
         CURRENT_DEALS.remove(deal_id)
