@@ -9,6 +9,9 @@ def convert_date_to_ru(date: str):
 
 def unify_phone(phone: str):
     # Приводим номер к единому формату
+    replace_symbols = "+-_() "
+    for replace_symbol in replace_symbols:
+        phone = phone.replace(replace_symbol, "")
     if phone:
         return f"7{phone[::-1][:10][::-1]}"
     return phone
