@@ -50,14 +50,19 @@ def get_funnel_info_from_integration_table():
     table = get_table_data(settings.INTEGRATIONS_SPREADSHEET_ID, settings.INTEGRATIONS_SHEET_NAME)
     df = pd.DataFrame(table[2:], columns=table[1])
     request_columns = [
-        'Проекты',
+        'Все проекты на 13.12',
+        'Статус',
         'ID Стадии',
         'Ссылка на таблицу лидов [предыдущие]',
         'Название листа',
         'Названия прошлых листов',
         'Телеграм бот:'
     ]
-    return df[request_columns]
+    return df[df['Статус'].isin([
+        'Подключить',
+        'Подключить Приоритет 2',
+        'Подключить Приоритет 3'
+    ])][request_columns]
 
 
 def validate_data(fields: dict, stage_id: str):
