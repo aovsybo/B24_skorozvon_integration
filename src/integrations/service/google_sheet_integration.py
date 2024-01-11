@@ -50,19 +50,14 @@ def get_funnel_info_from_integration_table():
     table = get_table_data(settings.INTEGRATIONS_SPREADSHEET_ID, settings.INTEGRATIONS_SHEET_NAME)
     df = pd.DataFrame(table[2:], columns=table[1])
     request_columns = [
-        'Все проекты на 13.12',
-        'Статус',
+        'Проекты',
         'ID Стадии',
         'Ссылка на таблицу лидов [предыдущие]',
         'Название листа',
         'Названия прошлых листов',
         'Телеграм бот:'
     ]
-    return df[df['Статус'].isin([
-        'Подключить',
-        'Подключить Приоритет 2',
-        'Подключить Приоритет 3'
-    ])][request_columns]
+    return df[request_columns]
 
 
 def validate_data(fields: dict, stage_id: str):
@@ -161,7 +156,7 @@ def get_funnel_table_links(stage_id: str, integrations_table, city: str):
     """
     links = integrations_table.loc[integrations_table['ID Стадии'] == stage_id].to_dict("records")
     count_of_integrations = len(links)
-    funnel_number = links[0]["Все проекты на 13.12"].split()[0]
+    funnel_number = links[0]["Проекты"].split()[0]
     index = 0
     if count_of_integrations > 1 and funnel_number == "[П5]":
         # Если работаем с воронкой П5 где более одной записи, то имя листа получаем по городу
