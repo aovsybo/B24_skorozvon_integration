@@ -110,15 +110,13 @@ def validate_data(fields: dict, stage_id: str):
         ]
     else:
         # Для остальных
-        lead_type = settings.BITRIX_LEAD_TYPE[fields['lead_type']]
-        lead_qualification = settings.BITRIX_LEAD_QUALIFICATION[fields['lead_qualification']]
         insert_data = [
             fields['date'],
             "", ## для записи вручную
             fields['lead_name'],
             fields['phone'],
             fields['lead_comment'],
-            f"{lead_type} | {lead_qualification}",
+            f"{fields['lead_type']} | {fields['lead_qualification']}",
             fields['link_to_audio'],
         ]
     return insert_data

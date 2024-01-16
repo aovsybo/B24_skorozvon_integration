@@ -7,13 +7,11 @@ bot = telebot.TeleBot(settings.TG_API_TOKEN)
 
 
 def send_message_to_tg(fields: dict, receiver_id: str):
-    lead_type = settings.BITRIX_LEAD_TYPE[fields['lead_type']]
-    lead_qualification = settings.BITRIX_LEAD_QUALIFICATION[fields['lead_qualification']]
     message = f"""Новый лид: {fields['lead_name']}_{fields['phone']};\n
 Имя: {fields['lead_name']};\n
 Телефон: {fields['phone']};\n
 Комментарий: {fields['lead_comment']};\n
-Доп. комментарий: {lead_type} | {lead_qualification};\n
+Доп. комментарий: {fields['lead_type']} | {fields['lead_qualification']};\n
 Ссылка на запись: {fields['link_to_audio']};\n
 Дата лида: {fields['date']};"""
     send_message(message, receiver_id)
