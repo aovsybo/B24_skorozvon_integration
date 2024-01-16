@@ -2,6 +2,8 @@ import requests
 
 from django.conf import settings
 
+from .google_sheet_integration import get_config_sheet_data
+
 
 def convert_date_to_ru(date: str):
     return ".".join(date.split("T")[0].split("-")[::-1])
@@ -45,42 +47,16 @@ def get_deal_info(deal_id):
     response = {
         "lead_name": deal["UF_CRM_1664819061161"],
         "phone": unify_phone(deal["UF_CRM_1665719874029"]),
-        "lead_type": deal["UF_CRM_1664819174514"],
-        "lead_qualification": deal["UF_CRM_1664819117290"],
+        "lead_type": get_config_sheet_data("Тип лида", deal["UF_CRM_1664819174514"]),
+        "lead_qualification": get_config_sheet_data("Квалификация лида", deal["UF_CRM_1664819117290"]),
         "lead_comment": deal["UF_CRM_1664819040131"],
         "link_to_audio": deal["UF_CRM_1664819217017"],
         "date": convert_date_to_ru(deal["DATE_MODIFY"]),
-        "city": "",
-        "country": "",
-        "car_mark": "",
-        "car_model": "",
+        "city": get_config_sheet_data("Город", deal["UF_CRM_1687464323171"]),
+        "country": get_config_sheet_data("Страна", deal["UF_CRM_1688409961271"]),
+        "car_mark": deal["UF_CRM_1694678311862"],
+        "car_model": deal["UF_CRM_1694678343732"],
     }
-    extra_fields = {
-        "city": {
-            "has_choices": True,
-            "code": "UF_CRM_1687464323171",
-            "id_to_name": settings.BITRIX_CITIES,
-        },
-        "country": {
-            "has_choices": True,
-            "code": "UF_CRM_1688409961271",
-            "id_to_name": settings.BITRIX_COUNTRIES,
-        },
-        "car_mark": {
-            "has_choices": False,
-            "code": "UF_CRM_1694678311862",
-        },
-        "car_model": {
-            "has_choices": False,
-            "code": "UF_CRM_1694678343732",
-        },
-    }
-    for field, info in extra_fields.items():
-        if info["code"] in deal and deal[info["code"]]:
-            if info["has_choices"]:
-                response[field] = info["id_to_name"][deal[info["code"]]]
-            else:
-                response[field] = deal[info["code"]]
     return response, deal["STAGE_ID"]
 
 
