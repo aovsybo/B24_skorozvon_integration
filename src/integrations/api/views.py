@@ -125,4 +125,6 @@ class DealCreationHandlerAPI(APIView):
 class GetCalls(APIView):
     def get(self, request):
         data = dict()
+        # data["calls"] = get_calls()
+        # data["funnel"] = get_funnel_info_from_integration_table()
         return Response(data=data, status=status.HTTP_200_OK)
