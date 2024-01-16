@@ -43,6 +43,18 @@ def get_table_data(table_link, sheet_name):
     return response["values"]
 
 
+def get_table_data_by_range(table_link, sheet_name, sheet_range):
+    """
+    Получаем данные из таблицы по ссылке и имени листа
+    """
+    service = get_service()
+    response = service.spreadsheets().values().get(
+        spreadsheetId=table_link,
+        range=f"{sheet_name}!{sheet_range}"
+    ).execute()
+    return response["values"]
+
+
 def get_funnel_info_from_integration_table():
     """
     Получаем данные из таблицы с интеграциями по названию интеграции
@@ -177,3 +189,13 @@ def get_funnel_table_links(stage_id: str, integrations_table, city: str):
         "sheet_name": links[index]["Название листа"],
         "previous_sheet_names": previous_sheet_names,
     }
+
+
+def get_config_sheet_data(column: str, code: str):
+    i = settings.CONFIG_SHEET_FIELDS.index(column) * 2
+    sheet_range = f"{chr(ord('A') + i)}:{chr(ord('A') + i + 1)}"
+    table = get_table_data_by_range(settings.INTEGRATIONS_SPREADSHEET_ID, settings.CONFIG_SHEET_NAME, sheet_range)
+    for pair in table[2:]:
+        if pair[0] == code:
+            return pair[1]
+    return ""
