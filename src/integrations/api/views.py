@@ -8,27 +8,24 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .serializers import CallInfoSerializer
-from integrations.service.yandex_disk_integration import (
+from ..service.yandex_disk_integration import (
     upload_to_disk,
     get_file_share_link
 )
-from integrations.service.skorozvon_integration import (
-    get_call,
-    get_calls
-)
-from integrations.service.bitrix_integration import (
+from ..service.skorozvon_integration import skorozvon_api
+from ..service.bitrix_integration import (
     create_bitrix_deal,
     get_deal_info,
     get_category_id,
     move_deal_to_doubles_stage,
 )
-from integrations.service.google_sheet_integration import (
+from ..service.google_sheet_integration import (
     send_to_google_sheet,
     get_funnel_table_links,
     is_unique_data,
     get_funnel_info_from_integration_table,
 )
-from integrations.service.telegram_integration import (
+from ..service.telegram_integration import (
     send_message_to_dev,
     send_message_to_tg,
 )
@@ -59,7 +56,7 @@ class PhoneCallInfoAPI(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         # Загружаем запись на яндекс.диск и получаем ссылку
-        call_content = get_call(data["call_id"])
+        call_content = skorozvon_api.get_call(data["call_id"])
         date_string = datetime.now().strftime("%d%m%Y%H%M%S")
         file_name = f"call_audio_{data['call_id']}_{date_string}.mp3"
         with open(f"{settings.BASE_DIR}/{file_name}", "wb") as f:
@@ -125,6 +122,6 @@ class DealCreationHandlerAPI(APIView):
 class GetCalls(APIView):
     def get(self, request):
         data = dict()
-        # data["calls"] = get_calls()
+        data["call"] = skorozvon_api.get_call(881308363)
         # data["funnel"] = get_funnel_info_from_integration_table()
         return Response(data=data, status=status.HTTP_200_OK)
