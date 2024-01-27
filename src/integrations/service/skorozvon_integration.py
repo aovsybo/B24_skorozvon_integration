@@ -6,6 +6,8 @@ from django.conf import settings
 
 
 class SkorozvonAPI:
+    #TODO: poetry lib /
+
     _token = None
     BASE_URL = "https://app.skorozvon.ru/api/v2/"
 
@@ -14,6 +16,7 @@ class SkorozvonAPI:
 
     @staticmethod
     def get_token():
+        # TODO: cache token
         url = "https://app.skorozvon.ru/oauth/token"
         data = {
             "grant_type": "password",

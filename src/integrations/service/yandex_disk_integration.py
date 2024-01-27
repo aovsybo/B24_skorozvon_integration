@@ -23,6 +23,7 @@ def create_file_name(call_id: int):
 
 
 def upload_file_to_disk(filename: str):
+    # TODO: switch from uploading from filesystem to uploading from bytes
     y = yadisk.YaDisk(token=settings.YANDEX_DISK_TOKEN)
     y.upload(f"{settings.BASE_DIR}/{filename}", filename)
 
