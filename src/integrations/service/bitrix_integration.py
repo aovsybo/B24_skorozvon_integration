@@ -3,6 +3,8 @@ import requests
 from django.conf import settings
 
 from .google_sheet_integration import get_config_sheet_data
+from .skorozvon_integration import skorozvon_api
+from .yandex_disk_integration import get_file_share_link
 
 
 def convert_date_to_ru(date: str):
@@ -89,21 +91,27 @@ def get_or_create_contact_id(lead_name, call_phone):
     return current_contact["ID"]
 
 
-def create_bitrix_deal(deal_name, lead_name, call_phone, lead_comment, share_link, category_id):
-    current_contact_id = get_or_create_contact_id(lead_name, call_phone)
+def create_bitrix_deal(lead_info: dict):
+    # TODO: set timer
+    call_id = lead_info.get("call_id", "")
+    call_data = skorozvon_api.get_call_audio(call_id)
+    share_link = get_file_share_link(call_data, call_id)
+    # TODO: bitrix creation
+    # current_contact_id = get_or_create_contact_id(lead_name, call_phone)
     data = {
         "fields": {
-            "TITLE": deal_name,
+            "TITLE": "Лид",
             "COMMENTS": f"Запись разговора: {share_link}\n"
-                        f"Комментарий: {lead_comment}",
-            "CONTACT_ID": current_contact_id,
-            "CATEGORY_ID": category_id
+                        f"Комментарий: {lead_info['comment']}",
+            # TODO: Брать айди категории от сценария
+            "CATEGORY_ID": "94"
         }
     }
     response = requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json=data)
     return {
         "status": response.status_code,
-        "message": response.text
+        "message": response.text,
+        "response": response.json(),
     }
 
 

@@ -1,3 +1,5 @@
+from datetime import timedelta, datetime
+
 import requests
 
 from django.conf import settings
@@ -40,7 +42,7 @@ class SkorozvonAPI:
             "page": 3,
             "length": 100,
             "sort_by_time": True,
-            "start_time": 1706078354
+            "start_time": datetime.timestamp(datetime.utcnow() - timedelta(days=1))
         }
         return self.get_request("calls", params)
 
