@@ -4,7 +4,7 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from .serializers import CallInfoSerializer
+from .serializers import CallDataInfoSerializer
 from ..service.skorozvon_integration import skorozvon_api
 from ..service.bitrix_integration import (
     create_bitrix_deal,
@@ -24,16 +24,37 @@ CURRENT_DEALS = []
 
 
 class PhoneCallInfoAPI(CreateAPIView):
-    serializer_class = CallInfoSerializer
+    serializer_class = CallDataInfoSerializer
+
+    @staticmethod
+    def flatten_data(y):
+        out = {}
+
+        def flatten(x, name=''):
+            if type(x) is dict:
+                for a in x:
+                    flatten(x[a], name + a + '_')
+            elif type(x) is list:
+                i = 0
+                for a in x:
+                    flatten(a, name + str(i) + '_')
+                    i += 1
+            else:
+                out[name[:-1]] = x
+        flatten(y)
+        return out
+
+    # def post(self, request, *args, **kwargs):
+    #     return Response(self.flatten_data(request.data), status=status.HTTP_201_CREATED)
 
     def post(self, request, *args, **kwargs):
         # TODO: Save all to DB
         # TODO: Filtering request by scenario and result id (Oleg)
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=self.flatten_data(request.data))
         serializer.is_valid(raise_exception=True)
         serializer.save()
         # TODO: Dont pass dict
-        create_bitrix_deal(serializer.data)
+        # create_bitrix_deal(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 

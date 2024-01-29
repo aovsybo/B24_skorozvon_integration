@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import CallInfo
+from .models import CallDataInfo
 
 
-admin.site.register(CallInfo)
+admin.site.register(CallDataInfo)
