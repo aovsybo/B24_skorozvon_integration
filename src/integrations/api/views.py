@@ -1,6 +1,3 @@
-import os
-from datetime import datetime
-
 from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView
@@ -12,7 +9,6 @@ from ..service.skorozvon_integration import skorozvon_api
 from ..service.bitrix_integration import (
     create_bitrix_deal,
     get_deal_info,
-    get_category_id,
     move_deal_to_doubles_stage,
 )
 from ..service.google_sheet_integration import (

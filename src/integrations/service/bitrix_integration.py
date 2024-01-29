@@ -20,7 +20,7 @@ def unify_phone(phone: str):
     for replace_symbol in replace_symbols:
         phone = phone.replace(replace_symbol, "")
     if phone:
-        return f"7{phone[::-1][:10][::-1]}"
+        return f"7{phone[-10:]}"
     return phone
 
 
@@ -52,46 +52,17 @@ def get_deal_info(deal_id):
     response = {
         "lead_name": deal["UF_CRM_1664819061161"],
         "phone": unify_phone(deal["UF_CRM_1665719874029"]),
-        # "lead_type": get_config_sheet_data("Тип лида", deal["UF_CRM_1664819174514"]),
         "lead_type": settings.BITRIX_LEAD_TYPE[deal["UF_CRM_1664819174514"]],
-        # "lead_qualification": get_config_sheet_data("Квалификация лида", deal["UF_CRM_1664819117290"]),
         "lead_qualification": settings.BITRIX_LEAD_QUALIFICATION[deal["UF_CRM_1664819117290"]],
         "lead_comment": deal["UF_CRM_1664819040131"],
         "link_to_audio": deal["UF_CRM_1664819217017"],
         "date": convert_date_to_ru(deal["DATE_MODIFY"]),
         "city": settings.BITRIX_CITIES[deal["UF_CRM_1687464323171"]],
-        # "city": get_config_sheet_data("Город", deal["UF_CRM_1687464323171"]),
         "country": settings.BITRIX_COUNTRIES[deal["UF_CRM_1688409961271"]],
-        # "country": get_config_sheet_data("Страна", deal["UF_CRM_1688409961271"]),
         "car_mark": deal["UF_CRM_1694678311862"],
         "car_model": deal["UF_CRM_1694678343732"],
     }
     return response, deal["STAGE_ID"]
-
-
-def create_contact(lead_name, call_phone):
-    data = {
-        "fields": {
-            "NAME": lead_name,
-            "PHONE": [call_phone]
-        }
-    }
-    create_status = requests.post(url=settings.BITRIX_CREATE_CONTACT_API_LINK, json=data)
-    if create_status == 200:
-        return {"status": "success"}
-    else:
-        return {"status": "failed"}
-
-
-def get_contacts_list():
-    return requests.get(url=settings.BITRIX_GET_LIST_OF_CONTACTS).json()["result"]
-
-
-def get_or_create_contact_id(lead_name, call_phone):
-    contacts = get_contacts_list()
-    create_contact(lead_name, call_phone)
-    current_contact = max(contacts, key=lambda x: x["ID"])
-    return current_contact["ID"]
 
 
 def time_limit_signalization(func):
@@ -121,15 +92,15 @@ def create_bitrix_deal(lead_info: dict):
     call_id = lead_info.get("call_id", "")
     call_data = skorozvon_api.get_call_audio(call_id)
     share_link = get_file_share_link(call_data, call_id)
-    # TODO: bitrix creation
-    # current_contact_id = get_or_create_contact_id(lead_name, call_phone)
     data = {
         "fields": {
             "TITLE": "Лид",
-            "COMMENTS": f"Запись разговора: {share_link}\n"
-                        f"Комментарий: {lead_info['comment']}",
+            "UF_CRM_1665719874029": lead_info['organisation_name'],
+            "UF_CRM_1664819061161": lead_info['organisation_phone'],
+            "UF_CRM_1664819217017": share_link,
+            "UF_CRM_1664819040131": lead_info['comment'],
             # TODO: Брать айди категории от сценария
-            "CATEGORY_ID": "94"
+            "CATEGORY_ID": "94",
         }
     }
     return requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json=data)
