@@ -1,5 +1,4 @@
 import os
-import time
 from datetime import datetime
 
 from django.conf import settings
@@ -22,10 +21,7 @@ from ..service.google_sheet_integration import (
     is_unique_data,
     get_funnel_info_from_integration_table,
 )
-from ..service.telegram_integration import (
-    send_message_to_dev,
-    send_message_to_tg,
-)
+from ..service.telegram_integration import send_message_to_tg
 
 
 CURRENT_DEALS = []
