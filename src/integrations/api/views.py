@@ -37,22 +37,7 @@ class PhoneCallInfoAPI(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         # TODO: Dont pass dict
-        print(create_bitrix_deal(serializer.data))
-
-        # # Создаем сделку в битриксе
-        # category_name = "[П44] ТЕСТ ИНТЕГРАЦИЙ"
-        # category_id = get_category_id(category_name)
-        # create_bitrix_deal(
-        #     "Лид",
-        #     serializer.data["organisation_name"],
-        #     {"VALUE": serializer.data["organisation_phone"], "VALUE_TYPE": "WORK"},
-        #     serializer.data["comment"],
-        #     yandex_disk_link,
-        #     category_id,
-        # )
-        # # Проверяем что весь процесс занял менее 10 минут
-        # # TODO: сделать через декоратор
-
+        create_bitrix_deal(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 

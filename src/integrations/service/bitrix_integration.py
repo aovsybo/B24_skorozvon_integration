@@ -95,15 +95,23 @@ def get_or_create_contact_id(lead_name, call_phone):
 
 
 def time_limit_signalization(func):
+    """
+    Декоратор для проверки времени выполнения функции
+    Если время выполнения превышает TIME_LIMIT_MINUTES,
+    То соответствующеесообщение отправляется в чат разработки
+    """
+    time_limit_minutes = 10
+
     @wraps(func)
     def wrap(*args, **kw):
         start_time = time.time()
         result = func(*args, **kw)
         end_time = time.time()
-        time_limit_minutes = 10
         upload_time_minutes = int((end_time - start_time) // 60)
         if upload_time_minutes > time_limit_minutes:
-            send_message_to_dev_chat(f"Загрузка аудиофайла по звонку {args[0]['call_id']} составила {upload_time_minutes}.")
+            send_message_to_dev_chat(
+                f"Загрузка аудиофайла по звонку {args[0]['call_id']} составила {upload_time_minutes}."
+            )
         return result
     return wrap
 
