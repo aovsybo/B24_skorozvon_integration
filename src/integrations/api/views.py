@@ -44,11 +44,7 @@ class PhoneCallInfoAPI(CreateAPIView):
         flatten(y)
         return out
 
-    # def post(self, request, *args, **kwargs):
-    #     return Response(self.flatten_data(request.data), status=status.HTTP_201_CREATED)
-
     def post(self, request, *args, **kwargs):
-        # TODO: Save all to DB
         # TODO: Filtering request by scenario and result id (Oleg)
         serializer = self.serializer_class(data=self.flatten_data(request.data))
         serializer.is_valid(raise_exception=True)
