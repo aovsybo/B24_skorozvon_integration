@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from functools import wraps
 import requests
 import time
@@ -87,18 +88,27 @@ def time_limit_signalization(func):
     return wrap
 
 
+@dataclass
+class BitrixDealCreationFields:
+    title: str
+    call_id: str
+    name: str
+    phone: str
+    comment: str
+
+
 @time_limit_signalization
-def create_bitrix_deal(lead_info: dict):
-    call_id = lead_info.get("call_id", "")
+def create_bitrix_deal(lead_info: BitrixDealCreationFields):
+    call_id = lead_info.call_id
     call_data = skorozvon_api.get_call_audio(call_id)
     share_link = get_file_share_link(call_data, call_id)
     data = {
         "fields": {
-            "TITLE": "Лид",
-            "UF_CRM_1665719874029": lead_info['organisation_name'],
-            "UF_CRM_1664819061161": lead_info['organisation_phone'],
+            "TITLE": lead_info.title,
+            "UF_CRM_1664819061161": lead_info.name,
+            "UF_CRM_1665719874029": lead_info.phone,
             "UF_CRM_1664819217017": share_link,
-            "UF_CRM_1664819040131": lead_info['comment'],
+            "UF_CRM_1664819040131": lead_info.comment,
             # TODO: Брать айди категории от сценария
             "CATEGORY_ID": "94",
         }

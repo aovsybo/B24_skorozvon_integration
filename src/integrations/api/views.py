@@ -7,6 +7,7 @@ from rest_framework import status
 from .serializers import CallDataInfoSerializer
 from ..service.skorozvon_integration import skorozvon_api
 from ..service.bitrix_integration import (
+    BitrixDealCreationFields,
     create_bitrix_deal,
     get_deal_info,
     move_deal_to_doubles_stage,
@@ -49,9 +50,15 @@ class PhoneCallInfoAPI(CreateAPIView):
         serializer = self.serializer_class(data=self.flatten_data(request.data))
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        # TODO: Dont pass dict
-        # create_bitrix_deal(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        lead_info = BitrixDealCreationFields(
+            title="Лид",
+            call_id=serializer.data["call_id"],
+            name=serializer.data["lead_name"],
+            phone=serializer.data["lead_phones"],
+            comment=serializer.data["lead_comment"],
+        )
+        create_bitrix_deal(lead_info)
+        return Response(status=status.HTTP_201_CREATED)
 
 
 class DealCreationHandlerAPI(APIView):
