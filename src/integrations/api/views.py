@@ -11,6 +11,7 @@ from ..service.bitrix_integration import (
     create_bitrix_deal,
     get_deal_info,
     move_deal_to_doubles_stage,
+    get_categories,
 )
 from ..service.google_sheet_integration import (
     send_to_google_sheet,
@@ -56,6 +57,8 @@ class PhoneCallInfoAPI(CreateAPIView):
             name=serializer.data["lead_name"],
             phone=serializer.data["lead_phones"],
             comment=serializer.data["lead_comment"],
+            scenario_id=serializer.data["call_scenario_id"],
+            result_name=serializer.data["call_result_result_name"],
         )
         create_bitrix_deal(lead_info)
         return Response(status=status.HTTP_201_CREATED)
@@ -98,6 +101,7 @@ class DealCreationHandlerAPI(APIView):
 class TestAPI(APIView):
     def get(self, request):
         data = dict()
-        data["call"] = skorozvon_api.get_call_c(881485321)
-        # data["calls"] = skorozvon_api.get_calls_list()
+        # data["call"] = skorozvon_api.get_call_info(881485321) # 68862
+        data["calls"] = skorozvon_api.get_scenarios()
+        data["cats"] = get_categories()
         return Response(data=data, status=status.HTTP_200_OK)

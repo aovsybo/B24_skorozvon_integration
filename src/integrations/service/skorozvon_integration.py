@@ -52,5 +52,9 @@ class SkorozvonAPI:
     def get_call_audio(self, call_id: int):
         return self.get_request(f"calls/{call_id}.mp3", has_content=True)
 
+    def get_scenarios(self):
+        response = self.get_request("scenarios")
+        return {sc["id"]: sc["name"] for sc in response["data"]}
+
 
 skorozvon_api = SkorozvonAPI()

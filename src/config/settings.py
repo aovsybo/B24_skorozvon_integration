@@ -91,7 +91,12 @@ BITRIX_COUNTRIES = {
     "433": "Индонезия",
     "": "",
 }
-
+BITRIX_CATEGORY_NAME_TO_SCENARIO = {
+    "ABC.DATA: РЕГИОНЫ (бывш Ростов)": "[П44] ТЕСТ ИНТЕГРАЦИЙ",
+}
+BITRIX_SUCCESSFUL_RESULT_NAMES = [
+    "успех",
+]
 SCOPES = os.environ.get("SCOPES").split(',')
 INTEGRATIONS_SPREADSHEET_ID = os.environ.get("INTEGRATIONS_SPREADSHEET_ID")
 INTEGRATIONS_SHEET_NAME = "таблицы проектов"

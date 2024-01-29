@@ -5,7 +5,6 @@ import time
 
 from django.conf import settings
 
-from .google_sheet_integration import get_config_sheet_data
 from .skorozvon_integration import skorozvon_api
 from .yandex_disk_integration import get_file_share_link
 from .telegram_integration import send_message_to_dev_chat
@@ -95,6 +94,8 @@ class BitrixDealCreationFields:
     name: str
     phone: str
     comment: str
+    scenario_id: str
+    result_name: str
 
 
 @time_limit_signalization
@@ -102,6 +103,16 @@ def create_bitrix_deal(lead_info: BitrixDealCreationFields):
     call_id = lead_info.call_id
     call_data = skorozvon_api.get_call_audio(call_id)
     share_link = get_file_share_link(call_data, call_id)
+    scenarios = skorozvon_api.get_scenarios()
+    # TODO: check for result_name/id
+    # TODO: fulfill dict (scenario to category)
+    if (
+            lead_info.scenario_id not in scenarios.keys()
+            or lead_info.result_name.lower() not in settings.BITRIX_SUCCESSFUL_RESULT_NAMES
+    ):
+        return
+    scenario_name = scenarios[lead_info.scenario_id]
+    category_id = get_category_id(scenario_name)
     data = {
         "fields": {
             "TITLE": lead_info.title,
@@ -109,17 +120,18 @@ def create_bitrix_deal(lead_info: BitrixDealCreationFields):
             "UF_CRM_1665719874029": lead_info.phone,
             "UF_CRM_1664819217017": share_link,
             "UF_CRM_1664819040131": lead_info.comment,
-            # TODO: Брать айди категории от сценария
-            "CATEGORY_ID": "94",
+            "CATEGORY_ID": category_id,
         }
     }
     return requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json=data)
 
 
-def get_category_id(category_name):
-    response = requests.get(settings.BITRIX_GET_DEAL_CATEGORY_LIST)
-    categories = response.json()["result"]
-    for category in categories:
-        if category["NAME"] == category_name:
-            return category["ID"]
-    return 0
+def get_categories():
+    response = requests.get(settings.BITRIX_GET_DEAL_CATEGORY_LIST).json()["result"]
+    return {cat["NAME"]: cat["ID"] for cat in response}
+
+
+def get_category_id(scenario_name):
+    category_name = settings.BITRIX_CATEGORY_NAME_TO_SCENARIO[scenario_name]
+    return get_categories()[category_name]
+
