@@ -93,6 +93,7 @@ def get_or_create_contact_id(lead_name, call_phone):
 
 def create_bitrix_deal(lead_info: dict):
     # TODO: set timer
+    # start_time = time.time()
     call_id = lead_info.get("call_id", "")
     call_data = skorozvon_api.get_call_audio(call_id)
     share_link = get_file_share_link(call_data, call_id)
@@ -106,13 +107,12 @@ def create_bitrix_deal(lead_info: dict):
             # TODO: Брать айди категории от сценария
             "CATEGORY_ID": "94"
         }
+    # upload_time_minutes = int((time.time() - start_time) // 60)
+    # time_limit_minutes = 10
+    # if upload_time_minutes > time_limit_minutes:
+    #     send_message_to_dev(f"Загрузка аудиофайла по звонку {data['call_id']} составила {upload_time_minutes}.")
     }
-    response = requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json=data)
-    return {
-        "status": response.status_code,
-        "message": response.text,
-        "response": response.json(),
-    }
+    return requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json=data)
 
 
 def get_category_id(category_name):

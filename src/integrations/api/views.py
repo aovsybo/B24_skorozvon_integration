@@ -40,17 +40,9 @@ class PhoneCallInfoAPI(CreateAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        # TODO: Dont pass dict
         print(create_bitrix_deal(serializer.data))
-        # start_time = time.time()
-        # # Загружаем запись на яндекс.диск и получаем ссылку
-        # call_content = skorozvon_api.get_call_audio(serializer.data["call_id"])
-        # date_string = datetime.now().strftime("%d%m%Y%H%M%S")
-        # file_name = f"call_audio_{serializer.data['call_id']}_{date_string}.mp3"
-        # with open(f"{settings.BASE_DIR}/{file_name}", "wb") as f:
-        #     f.write(call_content)
-        # upload_to_disk(settings.BASE_DIR, file_name)
-        # os.remove(f"{settings.BASE_DIR}/{file_name}")
-        # yandex_disk_link = get_file_share_link(file_name)
+
         # # Создаем сделку в битриксе
         # category_name = "[П44] ТЕСТ ИНТЕГРАЦИЙ"
         # category_id = get_category_id(category_name)
@@ -64,10 +56,7 @@ class PhoneCallInfoAPI(CreateAPIView):
         # )
         # # Проверяем что весь процесс занял менее 10 минут
         # # TODO: сделать через декоратор
-        # upload_time_minutes = int((time.time() - start_time) // 60)
-        # time_limit_minutes = 10
-        # if upload_time_minutes > time_limit_minutes:
-        #     send_message_to_dev(f"Загрузка аудиофайла по звонку {data['call_id']} составила {upload_time_minutes}.")
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -108,6 +97,6 @@ class DealCreationHandlerAPI(APIView):
 class TestAPI(APIView):
     def get(self, request):
         data = dict()
-        data["call"] = skorozvon_api.get_call_info(881485321)
+        data["call"] = skorozvon_api.get_call_c(881485321)
         # data["calls"] = skorozvon_api.get_calls_list()
         return Response(data=data, status=status.HTTP_200_OK)

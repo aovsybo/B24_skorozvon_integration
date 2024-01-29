@@ -50,7 +50,7 @@ class SkorozvonAPI:
         return self.get_request("calls", params)
 
     def get_call_audio(self, call_id: int):
-        return self.get_request(f"calls/{call_id}", has_content=True)
+        return self.get_request(f"calls/{call_id}.mp3", has_content=True)
 
 
 skorozvon_api = SkorozvonAPI()
