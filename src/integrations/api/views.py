@@ -5,13 +5,16 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .serializers import CallDataInfoSerializer
-from ..service.skorozvon_integration import skorozvon_api
 from ..service.bitrix_integration import (
     BitrixDealCreationFields,
     create_bitrix_deal,
     get_deal_info,
     move_deal_to_doubles_stage,
-    get_categories,
+)
+from ..service.exceptions import (
+    UnsuccessfulLeadCreationError,
+    SideScenarioError,
+    CategoryKeyError,
 )
 from ..service.google_sheet_integration import (
     send_to_google_sheet,
@@ -19,6 +22,7 @@ from ..service.google_sheet_integration import (
     is_unique_data,
     get_funnel_info_from_integration_table,
 )
+from ..service.skorozvon_integration import skorozvon_api
 from ..service.telegram_integration import send_message_to_tg
 
 
@@ -47,12 +51,11 @@ class PhoneCallInfoAPI(CreateAPIView):
         return out
 
     def post(self, request, *args, **kwargs):
-        # TODO: Filtering request by scenario and result id (Oleg)
         serializer = self.serializer_class(data=self.flatten_data(request.data))
         serializer.is_valid(raise_exception=True)
         serializer.save()
         lead_info = BitrixDealCreationFields(
-            title="Лид",
+            title="Тест",
             call_id=serializer.data["call_id"],
             name=serializer.data["lead_name"],
             phone=serializer.data["lead_phones"],
@@ -60,7 +63,10 @@ class PhoneCallInfoAPI(CreateAPIView):
             scenario_id=serializer.data["call_scenario_id"],
             result_name=serializer.data["call_result_result_name"],
         )
-        create_bitrix_deal(lead_info)
+        try:
+            create_bitrix_deal(lead_info)
+        except (SideScenarioError, UnsuccessfulLeadCreationError, CategoryKeyError) as e:
+            return Response(data={"error_message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_201_CREATED)
 
 
@@ -101,7 +107,6 @@ class DealCreationHandlerAPI(APIView):
 class TestAPI(APIView):
     def get(self, request):
         data = dict()
-        # data["call"] = skorozvon_api.get_call_info(881485321) # 68862
-        data["calls"] = skorozvon_api.get_scenarios()
-        data["cats"] = get_categories()
+        data["calls"] = [call["id"] for call in skorozvon_api.get_calls_list()["data"] if call["recording_url"]]
+        # data["cats"] = get_categories()
         return Response(data=data, status=status.HTTP_200_OK)

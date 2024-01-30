@@ -5,9 +5,14 @@ import time
 
 from django.conf import settings
 
+from .exceptions import (
+    UnsuccessfulLeadCreationError,
+    SideScenarioError,
+    CategoryKeyError,
+)
 from .skorozvon_integration import skorozvon_api
-from .yandex_disk_integration import get_file_share_link
 from .telegram_integration import send_message_to_dev_chat
+from .yandex_disk_integration import get_file_share_link
 
 
 def convert_date_to_ru(date: str):
@@ -104,15 +109,14 @@ def create_bitrix_deal(lead_info: BitrixDealCreationFields):
     call_data = skorozvon_api.get_call_audio(call_id)
     share_link = get_file_share_link(call_data, call_id)
     scenarios = skorozvon_api.get_scenarios()
-    # TODO: check for result_name/id
-    # TODO: fulfill dict (scenario to category)
-    if (
-            lead_info.scenario_id not in scenarios.keys()
-            or lead_info.result_name.lower() not in settings.BITRIX_SUCCESSFUL_RESULT_NAMES
-    ):
-        return
+    if lead_info.scenario_id not in scenarios.keys():
+        raise SideScenarioError(f"Scenario '{lead_info.scenario_id}' not in working scenarios")
+    elif lead_info.result_name.lower() not in settings.BITRIX_SUCCESSFUL_RESULT_NAMES:
+        raise UnsuccessfulLeadCreationError(f"Result name '{lead_info.result_name}' is not successful")
     scenario_name = scenarios[lead_info.scenario_id]
     category_id = get_category_id(scenario_name)
+    if not category_id:
+        raise CategoryKeyError(f"Not found category according to scenario '{scenario_name}'")
     data = {
         "fields": {
             "TITLE": lead_info.title,
@@ -132,6 +136,6 @@ def get_categories():
 
 
 def get_category_id(scenario_name):
-    category_name = settings.BITRIX_CATEGORY_NAME_TO_SCENARIO[scenario_name]
-    return get_categories()[category_name]
+    category_name = settings.BITRIX_CATEGORY_NAME_TO_SCENARIO.get(scenario_name, "")
+    return get_categories().get(category_name, "")
 
