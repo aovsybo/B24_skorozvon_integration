@@ -105,7 +105,6 @@ class BitrixDealCreationFields:
 
 @time_limit_signalization
 def create_bitrix_deal(lead_info: BitrixDealCreationFields):
-    send_message_to_dev(lead_info.call_id)
     call_id = lead_info.call_id
     call_data = skorozvon_api.get_call_audio(call_id)
     share_link = get_file_share_link(call_data, call_id)

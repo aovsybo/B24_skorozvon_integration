@@ -177,7 +177,7 @@ TG_DEV_CHAT = os.environ.get("TG_DEV_CHAT")
 DEBUG = True
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(',')
-
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
 
 # Application definition
 
@@ -190,6 +190,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    "django_apscheduler",
 
     'integrations',
 ]

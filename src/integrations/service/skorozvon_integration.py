@@ -42,9 +42,10 @@ class SkorozvonAPI:
 
     def get_calls_list(self):
         params = {
-            "page": 3,
+            "page": 1,
             "length": 100,
             "sort_by_time": True,
+            "selected_fields":  ["id", "organization_id"],
             "start_time": datetime.timestamp(datetime.utcnow() - timedelta(days=1))
         }
         return self.get_request("calls", params)

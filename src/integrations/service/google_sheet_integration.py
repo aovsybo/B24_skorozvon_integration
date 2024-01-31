@@ -31,6 +31,24 @@ def get_service():
     return build('sheets', 'v4', credentials=creds)
 
 
+def get_sheet_config_data():
+    """
+    Функция возвращает данные с листа конфигурации
+    """
+    config_data = dict()
+    config_sheet_data = get_table_data(
+        "1Q1j1o900Iozcd_OOEIzbMkGO4GcRPqa3BehoDHw3KHQ",
+        "Конфигурация",
+    )
+    for i, name in enumerate([config_header for config_header in config_sheet_data[0] if config_header]):
+        config_data[name] = {
+            line[0+i*2]: line[1+i*2]
+            for line in config_sheet_data[2:]
+            if len(line) > i*2 and line[0+i*2]
+        }
+    return config_data
+
+
 def get_table_data(table_link, sheet_name):
     """
     Получаем данные из таблицы по ссылке и имени листа
@@ -187,13 +205,3 @@ def get_funnel_table_links(stage_id: str, integrations_table, city: str):
         "sheet_name": links[index]["Название листа"],
         "previous_sheet_names": previous_sheet_names,
     }
-
-
-def get_config_sheet_data(column: str, code: str):
-    i = settings.CONFIG_SHEET_FIELDS.index(column) * 2
-    sheet_range = f"{chr(ord('A') + i)}:{chr(ord('A') + i + 1)}"
-    table = get_table_data_by_range(settings.INTEGRATIONS_SPREADSHEET_ID, settings.CONFIG_SHEET_NAME, sheet_range)
-    for pair in table[2:]:
-        if pair[0] == code:
-            return pair[1]
-    return ""

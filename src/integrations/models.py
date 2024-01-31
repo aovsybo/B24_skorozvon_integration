@@ -1,6 +1,26 @@
 from django.db import models
 
 
+class IntegrationsData(models.Model):
+    project_name = models.CharField(max_length=255)
+    stage_id = models.CharField(max_length=255)
+    tg_bot_id = models.CharField(max_length=255)
+    google_spreadsheet_id = models.CharField(max_length=255)
+    sheet_name = models.CharField(max_length=255)
+    previous_sheet_names = models.CharField(max_length=255, blank=True)
+
+
+class ConfigProjectNames(models.Model):
+    skorozvon_scenario_name = models.CharField(max_length=255)
+    bitrix_project_name = models.CharField(max_length=255)
+
+
+class FieldIds(models.Model):
+    bitrix_field_name = models.CharField(max_length=255)
+    bitrix_field_id = models.IntegerField()
+    bitrix_field_value = models.CharField(max_length=255)
+
+
 class CallDataInfo(models.Model):
     type = models.CharField(max_length=255)
 

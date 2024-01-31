@@ -24,6 +24,7 @@ from ..service.google_sheet_integration import (
 )
 from ..service.skorozvon_integration import skorozvon_api
 from ..service.telegram_integration import send_message_to_tg
+from ..scheduler.scheduler import sync_google_sheets_data_to_db
 
 
 CURRENT_DEALS = []
@@ -107,6 +108,5 @@ class DealCreationHandlerAPI(APIView):
 class TestAPI(APIView):
     def get(self, request):
         data = dict()
-        data["calls"] = [call["id"] for call in skorozvon_api.get_calls_list()["data"] if call["recording_url"]]
-        # data["cats"] = get_categories()
+        data["int"] = "asd"
         return Response(data=data, status=status.HTTP_200_OK)
