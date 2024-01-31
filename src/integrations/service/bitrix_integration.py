@@ -123,8 +123,10 @@ def create_bitrix_deal(lead_info: BitrixDealCreationFields):
             "UF_CRM_1664819061161": lead_info.name,
             "UF_CRM_1665719874029": lead_info.phone,
             "UF_CRM_1664819217017": share_link,
-            "UF_CRM_1664819040131": lead_info.comment,
-            "CATEGORY_ID": category_id,
+            # "UF_CRM_1664819040131": lead_info.comment,
+            "UF_CRM_1664819040131": category_id,
+            # "CATEGORY_ID": category_id,
+            "CATEGORY_ID": "94",
         }
     }
     return requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json=data)
