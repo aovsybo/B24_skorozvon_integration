@@ -71,10 +71,6 @@ class PhoneCallInfoAPI(CreateAPIView):
 
 
 class DealCreationHandlerAPI(APIView):
-    # TODO: Get funnel from db
-    # @staticmethod
-    # def get_integration_field_from_db():
-
     def post(self, request):
         deal_id = request.data["data[FIELDS][ID]"]
         # Проверяем соответствие передаваемого ключа и ключа битрикса
