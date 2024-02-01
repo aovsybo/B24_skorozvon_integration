@@ -10,8 +10,9 @@ from .exceptions import (
     SideScenarioError,
     CategoryKeyError,
 )
+from ..models import ConfigProjectNames, FieldIds
 from .skorozvon_integration import skorozvon_api
-from .telegram_integration import send_message_to_dev_chat, send_message_to_dev
+from .telegram_integration import send_message_to_dev_chat
 from .yandex_disk_integration import get_file_share_link
 
 
@@ -52,18 +53,30 @@ def move_deal_to_doubles_stage(deal_id: str, stage_id: str):
     )
 
 
+def get_field_value_by_id(field_name: str, field_id: str) -> str:
+    if field_id == "":
+        return ""
+    try:
+        field_pair = FieldIds.objects.get(bitrix_field_name=field_name, bitrix_field_id=field_id)
+        field_object = FieldIds._meta.get_field("bitrix_field_value")
+        field_value = getattr(field_pair, field_object.attname)
+    except FieldIds.DoesNotExist:
+        field_value = ""
+    return field_value
+
+
 def get_deal_info(deal_id):
     deal = requests.get(settings.BITRIX_GET_DEAL_BY_ID, params={"ID": deal_id}).json()["result"]
     response = {
         "lead_name": deal["UF_CRM_1664819061161"],
         "phone": unify_phone(deal["UF_CRM_1665719874029"]),
-        "lead_type": settings.BITRIX_LEAD_TYPE[deal["UF_CRM_1664819174514"]],
-        "lead_qualification": settings.BITRIX_LEAD_QUALIFICATION[deal["UF_CRM_1664819117290"]],
+        "lead_type": get_field_value_by_id("Тип лида", deal["UF_CRM_1664819174514"]),
+        "lead_qualification": get_field_value_by_id("Квалификация лида", deal["UF_CRM_1664819117290"]),
         "lead_comment": deal["UF_CRM_1664819040131"],
         "link_to_audio": deal["UF_CRM_1664819217017"],
         "date": convert_date_to_ru(deal["DATE_MODIFY"]),
-        "city": settings.BITRIX_CITIES[deal["UF_CRM_1687464323171"]],
-        "country": settings.BITRIX_COUNTRIES[deal["UF_CRM_1688409961271"]],
+        "city": get_field_value_by_id("Город", deal["UF_CRM_1687464323171"]),
+        "country": get_field_value_by_id("Страна", deal["UF_CRM_1688409961271"]),
         "car_mark": deal["UF_CRM_1694678311862"],
         "car_model": deal["UF_CRM_1694678343732"],
     }
@@ -138,6 +151,11 @@ def get_categories():
 
 
 def get_category_id(scenario_name):
-    category_name = settings.BITRIX_CATEGORY_NAME_TO_SCENARIO.get(scenario_name, "")
+    try:
+        project_name = ConfigProjectNames.objects.get(skorozvon_scenario_name=scenario_name)
+        field_object = ConfigProjectNames._meta.get_field("bitrix_project_name")
+        category_name = getattr(project_name, field_object.attname)
+    except ConfigProjectNames.DoesNotExist:
+        category_name = None
     return get_categories().get(category_name, "")
 

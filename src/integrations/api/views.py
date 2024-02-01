@@ -108,5 +108,6 @@ class DealCreationHandlerAPI(APIView):
 class TestAPI(APIView):
     def get(self, request):
         data = dict()
-        data["int"] = "asd"
+        from ..service.bitrix_integration import get_category_id
+        data["deal"] = get_deal_info(1056922)
         return Response(data=data, status=status.HTTP_200_OK)
