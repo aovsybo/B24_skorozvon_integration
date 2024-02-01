@@ -1,7 +1,6 @@
-from ..models import IntegrationsData, ConfigProjectNames, FieldIds
-from ..api.serializers import IntegrationsDataSerializer, ConfigProjectNamesSerializer, FieldIdsSerializer
+from ..models import IntegrationsData, FieldIds
+from ..api.serializers import IntegrationsDataSerializer, FieldIdsSerializer
 from ..service.google_sheet_integration import get_sheet_config_data, get_funnel_info_from_integration_table
-from ..service.telegram_integration import send_message_to_dev
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -43,6 +42,7 @@ def sync_integrations_data(integrations_data: dict):
             "google_spreadsheet_id": get_spreadsheet_id_from_url(integrations_data["Ссылка на таблицу лидов [предыдущие]"][i]),
             "sheet_name": integrations_data["Название листа"][i],
             "previous_sheet_names": check_for_null(integrations_data["Названия прошлых листов"][i]),
+            "skorozvon_scenario_name": check_for_null(integrations_data["Имя сценария в скорозвоне"][i]),
         }
         if IntegrationsData.objects.filter(project_name=current_integration["project_name"]).exists():
             instance = IntegrationsData.objects.get(project_name=current_integration["project_name"])
@@ -55,20 +55,19 @@ def sync_integrations_data(integrations_data: dict):
             create_object(IntegrationsDataSerializer, current_integration)
 
 
-def sync_project_names(project_names: dict):
-    # TODO: двоится скедьюлер
-    for key, value in project_names.items():
-        data = {
-            "skorozvon_scenario_name": key,
-            "bitrix_project_name": value
-        }
-        if ConfigProjectNames.objects.filter(skorozvon_scenario_name=key).exists():
-            instance = ConfigProjectNames.objects.get(skorozvon_scenario_name=key)
-            serializer = ConfigProjectNamesSerializer(instance)
-            if key != serializer["skorozvon_scenario_name"] or value != serializer["bitrix_project_name"]:
-                serializer.update(instance, data)
-        else:
-            create_object(ConfigProjectNamesSerializer, data)
+# def sync_project_names(project_names: dict):
+#     for key, value in project_names.items():
+#         data = {
+#             "skorozvon_scenario_name": key,
+#             "bitrix_project_name": value
+#         }
+#         if ConfigProjectNames.objects.filter(skorozvon_scenario_name=key).exists():
+#             instance = ConfigProjectNames.objects.get(skorozvon_scenario_name=key)
+#             serializer = ConfigProjectNamesSerializer(instance)
+#             if key != serializer["skorozvon_scenario_name"] or value != serializer["bitrix_project_name"]:
+#                 serializer.update(instance, data)
+#         else:
+#             create_object(ConfigProjectNamesSerializer, data)
 
 
 def sync_field_ids(bitrix_field_name, config_data: dict):
@@ -91,7 +90,7 @@ def sync_field_ids(bitrix_field_name, config_data: dict):
 def sync_google_sheets_data_to_db():
     sync_integrations_data(get_funnel_info_from_integration_table())
     sheet_config_data = get_sheet_config_data()
-    sync_project_names(sheet_config_data["Соответстиве имен сценариев и воронок"])
+    # sync_project_names(sheet_config_data["Соответстиве имен сценариев и воронок"])
     for name, data in sheet_config_data.items():
         if name != "Соответстиве имен сценариев и воронок":
             sync_field_ids(name, data)

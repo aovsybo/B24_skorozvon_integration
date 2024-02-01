@@ -1,12 +1,6 @@
 from rest_framework import serializers
 
-from ..models import CallDataInfo, IntegrationsData, ConfigProjectNames, FieldIds
-
-
-class ConfigProjectNamesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ConfigProjectNames
-        fields = '__all__'
+from ..models import CallDataInfo, IntegrationsData, FieldIds
 
 
 class FieldIdsSerializer(serializers.ModelSerializer):

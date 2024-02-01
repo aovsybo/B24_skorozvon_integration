@@ -8,11 +8,7 @@ class IntegrationsData(models.Model):
     google_spreadsheet_id = models.CharField(max_length=255)
     sheet_name = models.CharField(max_length=255)
     previous_sheet_names = models.CharField(max_length=255, blank=True)
-
-
-class ConfigProjectNames(models.Model):
     skorozvon_scenario_name = models.CharField(max_length=255)
-    bitrix_project_name = models.CharField(max_length=255)
 
 
 class FieldIds(models.Model):

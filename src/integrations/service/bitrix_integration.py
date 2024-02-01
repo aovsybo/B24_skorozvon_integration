@@ -10,7 +10,7 @@ from .exceptions import (
     SideScenarioError,
     CategoryKeyError,
 )
-from ..models import ConfigProjectNames, FieldIds
+from ..models import FieldIds, IntegrationsData
 from .skorozvon_integration import skorozvon_api
 from .telegram_integration import send_message_to_dev_chat
 from .yandex_disk_integration import get_file_share_link
@@ -68,6 +68,7 @@ def get_field_value_by_id(field_name: str, field_id: str) -> str:
 def get_deal_info(deal_id):
     deal = requests.get(settings.BITRIX_GET_DEAL_BY_ID, params={"ID": deal_id}).json()["result"]
     response = {
+        "stage_id": deal["STAGE_ID"],
         "lead_name": deal["UF_CRM_1664819061161"],
         "phone": unify_phone(deal["UF_CRM_1665719874029"]),
         "lead_type": get_field_value_by_id("Тип лида", deal["UF_CRM_1664819174514"]),
@@ -80,7 +81,7 @@ def get_deal_info(deal_id):
         "car_mark": deal["UF_CRM_1694678311862"],
         "car_model": deal["UF_CRM_1694678343732"],
     }
-    return response, deal["STAGE_ID"]
+    return response
 
 
 def time_limit_signalization(func):
@@ -145,17 +146,21 @@ def create_bitrix_deal(lead_info: BitrixDealCreationFields):
     return requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json=data)
 
 
-def get_categories():
-    response = requests.get(settings.BITRIX_GET_DEAL_CATEGORY_LIST).json()["result"]
-    return {cat["NAME"]: cat["ID"] for cat in response}
+def check_categories():
+    objects = IntegrationsData.objects.all()
+    field_object = IntegrationsData._meta.get_field("skorozvon_scenario_name")
+    response = []
+    for instance in objects:
+        scenario_name = getattr(instance, field_object.attname)
+        response.append({scenario_name: get_category_id(scenario_name)})
+    return response
 
 
 def get_category_id(scenario_name):
     try:
-        project_name = ConfigProjectNames.objects.get(skorozvon_scenario_name=scenario_name)
-        field_object = ConfigProjectNames._meta.get_field("bitrix_project_name")
-        category_name = getattr(project_name, field_object.attname)
-    except ConfigProjectNames.DoesNotExist:
-        category_name = None
-    return get_categories().get(category_name, "")
-
+        integration = IntegrationsData.objects.get(skorozvon_scenario_name=scenario_name)
+        searching_field = IntegrationsData._meta.get_field("stage_id")
+        stage_id = getattr(integration, searching_field.attname)
+    except IntegrationsData.DoesNotExist:
+        stage_id = ""
+    return stage_id.split(":")[0].strip("C") if ":" in stage_id else stage_id
