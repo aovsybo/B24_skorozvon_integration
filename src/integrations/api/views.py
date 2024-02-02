@@ -19,9 +19,7 @@ from ..service.exceptions import (
 )
 from ..service.google_sheet_integration import (
     send_to_google_sheet,
-    get_funnel_table_links,
     is_unique_data,
-    get_funnel_info_from_integration_table,
 )
 from ..service.telegram_integration import send_message_to_tg
 
