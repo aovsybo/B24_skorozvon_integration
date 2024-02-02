@@ -124,7 +124,8 @@ class DealCreationHandlerAPI(APIView):
 
 class TestAPI(APIView):
     def get(self, request):
-        data = dict()
-        from ..service.bitrix_integration import check_categories
-        data["categories"] = check_categories()
-        return Response(data=data, status=status.HTTP_200_OK)
+        pass
+        # data = dict()
+        # from ..service.bitrix_integration import check_categories
+        # data["categories"] = check_categories()
+        # return Response(data=data, status=status.HTTP_200_OK)
