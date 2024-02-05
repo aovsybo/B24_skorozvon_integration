@@ -6,8 +6,6 @@ from django.conf import settings
 
 
 class SkorozvonAPI:
-    #TODO: poetry lib /
-
     _token = None
     BASE_URL = "https://app.skorozvon.ru/api/v2/"
 
@@ -46,7 +44,7 @@ class SkorozvonAPI:
             "length": 100,
             "sort_by_time": True,
             "selected_fields":  ["id", "organization_id"],
-            "start_time": datetime.timestamp(datetime.utcnow() - timedelta(days=1))
+            "start_time": datetime.timestamp(datetime.utcnow() - timedelta(hours=2))
         }
         return self.get_request("calls", params)
 
