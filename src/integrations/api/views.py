@@ -53,7 +53,7 @@ class PhoneCallInfoAPI(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         lead_info = BitrixDealCreationFields(
-            title="Тест",
+            title="Лид",
             call_id=serializer.data["call_id"],
             name=serializer.data["lead_name"],
             phone=serializer.data["lead_phones"],
