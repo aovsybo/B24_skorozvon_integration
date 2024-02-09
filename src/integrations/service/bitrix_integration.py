@@ -113,7 +113,7 @@ class BitrixDealCreationFields:
     name: str
     phone: str
     comment: str
-    scenario_id: str
+    scenario_id: int
     result_name: str
 
 
@@ -123,11 +123,11 @@ def create_bitrix_deal(lead_info: BitrixDealCreationFields):
     call_data = skorozvon_api.get_call_audio(call_id)
     share_link = get_file_share_link(call_data, call_id)
     scenarios = skorozvon_api.get_scenarios()
-    if lead_info.scenario_id not in scenarios.keys():
+    if int(lead_info.scenario_id) not in scenarios:
         raise SideScenarioError(f"Scenario '{lead_info.scenario_id}' not in working scenarios")
     elif lead_info.result_name.lower() not in settings.BITRIX_SUCCESSFUL_RESULT_NAMES:
         raise UnsuccessfulLeadCreationError(f"Result name '{lead_info.result_name}' is not successful")
-    scenario_name = scenarios[lead_info.scenario_id]
+    scenario_name = scenarios[int(lead_info.scenario_id)]
     category_id = get_category_id(scenario_name)
     if not category_id:
         raise CategoryKeyError(f"Not found category according to scenario '{scenario_name}'")
@@ -157,6 +157,7 @@ def check_categories():
 
 
 def get_category_id(scenario_name):
+    print(scenario_name)
     try:
         integration = IntegrationsData.objects.get(skorozvon_scenario_name=scenario_name)
         searching_field = IntegrationsData._meta.get_field("stage_id")

@@ -122,4 +122,8 @@ class DealCreationHandlerAPI(APIView):
 
 class TestAPI(APIView):
     def get(self, request):
-        return Response(status=status.HTTP_200_OK)
+        from ..service.skorozvon_integration import skorozvon_api
+        data = {
+            "s": skorozvon_api.get_scenarios()
+        }
+        return Response(data=data, status=status.HTTP_200_OK)
