@@ -21,7 +21,7 @@ from ..service.google_sheet_integration import (
     send_to_google_sheet,
     is_unique_data,
 )
-from ..service.telegram_integration import send_message_to_tg
+from ..service.telegram_integration import send_message_to_tg, send_message_to_dev
 
 
 CURRENT_DEALS = []
@@ -64,7 +64,8 @@ class PhoneCallInfoAPI(CreateAPIView):
         try:
             create_bitrix_deal(lead_info)
         except (SideScenarioError, UnsuccessfulLeadCreationError, CategoryKeyError) as e:
-            return Response(data={"error_message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            send_message_to_dev(str(e))
+            # return Response(data={"error_message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_201_CREATED)
 
 

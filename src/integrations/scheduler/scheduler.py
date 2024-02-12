@@ -90,7 +90,6 @@ def sync_field_ids(bitrix_field_name, config_data: dict):
 def sync_google_sheets_data_to_db():
     sync_integrations_data(get_funnel_info_from_integration_table())
     sheet_config_data = get_sheet_config_data()
-    # sync_project_names(sheet_config_data["Соответстиве имен сценариев и воронок"])
     for name, data in sheet_config_data.items():
         if name != "Соответстиве имен сценариев и воронок":
             sync_field_ids(name, data)
