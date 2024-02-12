@@ -98,5 +98,5 @@ def sync_google_sheets_data_to_db():
 
 def start():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(sync_google_sheets_data_to_db, 'cron', second="1")
+    scheduler.add_job(sync_google_sheets_data_to_db, 'interval', minutes="1")
     scheduler.start()
