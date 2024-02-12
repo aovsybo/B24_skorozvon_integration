@@ -65,6 +65,8 @@ class PhoneCallInfoAPI(CreateAPIView):
             create_bitrix_deal(lead_info)
         except (SideScenarioError, UnsuccessfulLeadCreationError, CategoryKeyError) as e:
             send_message_to_dev(str(e))
+        except Exception as e:
+            send_message_to_dev(f"Внеплановая ошибка: \n{str(e)}")
             # return Response(data={"error_message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_201_CREATED)
 
