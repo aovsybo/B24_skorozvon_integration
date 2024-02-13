@@ -81,6 +81,7 @@ def get_funnel_info_from_integration_table():
     df = pd.DataFrame(table[2:], columns=table[1])
     request_columns = [
         'Проекты',
+        'Статус',
         'ID Стадии',
         'Ссылка на таблицу лидов [предыдущие]',
         'Название листа',

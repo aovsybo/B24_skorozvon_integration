@@ -33,7 +33,7 @@ def sync_integrations_data(integrations_data: dict):
     for i in range(len(integrations_data["Проекты"])):
         if not integrations_data["Проекты"][i]:
             break
-        if not integrations_data["ID Стадии"][i]:
+        if integrations_data["Статус"][i] != "Подключить":
             continue
         current_integration = {
             "project_name": integrations_data["Проекты"][i],
@@ -53,21 +53,6 @@ def sync_integrations_data(integrations_data: dict):
                     break
         else:
             create_object(IntegrationsDataSerializer, current_integration)
-
-
-# def sync_project_names(project_names: dict):
-#     for key, value in project_names.items():
-#         data = {
-#             "skorozvon_scenario_name": key,
-#             "bitrix_project_name": value
-#         }
-#         if ConfigProjectNames.objects.filter(skorozvon_scenario_name=key).exists():
-#             instance = ConfigProjectNames.objects.get(skorozvon_scenario_name=key)
-#             serializer = ConfigProjectNamesSerializer(instance)
-#             if key != serializer["skorozvon_scenario_name"] or value != serializer["bitrix_project_name"]:
-#                 serializer.update(instance, data)
-#         else:
-#             create_object(ConfigProjectNamesSerializer, data)
 
 
 def sync_field_ids(bitrix_field_name, config_data: dict):

@@ -157,7 +157,6 @@ def check_categories():
 
 
 def get_category_id(scenario_name):
-    print(scenario_name)
     try:
         integration = IntegrationsData.objects.get(skorozvon_scenario_name=scenario_name)
         searching_field = IntegrationsData._meta.get_field("stage_id")

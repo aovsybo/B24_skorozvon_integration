@@ -62,12 +62,14 @@ class PhoneCallInfoAPI(CreateAPIView):
             result_name=serializer.data["call_result_result_name"],
         )
         try:
-            create_bitrix_deal(lead_info)
+            response = create_bitrix_deal(lead_info)
+            send_message_to_dev(response.text)
         except (SideScenarioError, UnsuccessfulLeadCreationError, CategoryKeyError) as e:
-            send_message_to_dev(str(e))
+            # send_message_to_dev(str(e))
+            pass
         except Exception as e:
-            send_message_to_dev(f"Внеплановая ошибка: \n{str(e)}")
-            # return Response(data={"error_message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            # send_message_to_dev(f"Внеплановая ошибка: \n{str(e)}")
+            pass
         return Response(status=status.HTTP_201_CREATED)
 
 
