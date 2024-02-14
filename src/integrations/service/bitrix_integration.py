@@ -12,7 +12,7 @@ from .exceptions import (
 )
 from ..models import FieldIds, IntegrationsData, ScenarioIds
 from .skorozvon_integration import skorozvon_api
-from .telegram_integration import send_message_to_dev_chat
+from .telegram_integration import send_message_to_dev_chat, send_message_to_dev
 from .yandex_disk_integration import get_file_share_link
 
 
@@ -136,8 +136,11 @@ def create_bitrix_deal(lead_info: BitrixDealCreationFields):
             "CATEGORY_ID": "94",
         }
     }
-    return requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json=data)
-
+    if category_id in ["5", "19", "21", "29", "31", "37", "94"]:
+        return requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json=data)
+    else:
+        send_message_to_dev(category_id)
+        return
 
 def get_category_id(scenario_id):
     try:
