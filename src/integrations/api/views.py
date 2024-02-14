@@ -13,9 +13,9 @@ from ..service.bitrix_integration import (
     move_deal_to_doubles_stage,
 )
 from ..service.exceptions import (
+    ScenarioNotFoundError,
     UnsuccessfulLeadCreationError,
-    SideScenarioError,
-    CategoryKeyError,
+    CategoryNotFoundError,
 )
 from ..service.google_sheet_integration import (
     send_to_google_sheet,
@@ -64,7 +64,7 @@ class PhoneCallInfoAPI(CreateAPIView):
         try:
             response = create_bitrix_deal(lead_info)
             send_message_to_dev(response.text)
-        except (SideScenarioError, UnsuccessfulLeadCreationError, CategoryKeyError) as e:
+        except (ScenarioNotFoundError, UnsuccessfulLeadCreationError, CategoryNotFoundError) as e:
             # send_message_to_dev(str(e))
             pass
         except Exception as e:
@@ -128,7 +128,5 @@ class DealCreationHandlerAPI(APIView):
 class TestAPI(APIView):
     def get(self, request):
         from ..service.skorozvon_integration import skorozvon_api
-        data = {
-            "s": skorozvon_api.get_scenarios()
-        }
+        data = dict()
         return Response(data=data, status=status.HTTP_200_OK)

@@ -2,7 +2,7 @@ class BitrixDealCreation(Exception):
     pass
 
 
-class SideScenarioError(BitrixDealCreation):
+class ScenarioNotFoundError(BitrixDealCreation):
     pass
 
 
@@ -10,5 +10,5 @@ class UnsuccessfulLeadCreationError(BitrixDealCreation):
     pass
 
 
-class CategoryKeyError(BitrixDealCreation):
+class CategoryNotFoundError(BitrixDealCreation):
     pass

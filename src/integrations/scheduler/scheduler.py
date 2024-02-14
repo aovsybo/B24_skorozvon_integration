@@ -1,6 +1,7 @@
-from ..models import IntegrationsData, FieldIds
-from ..api.serializers import IntegrationsDataSerializer, FieldIdsSerializer
+from ..models import IntegrationsData, FieldIds, ScenarioIds
+from ..api.serializers import IntegrationsDataSerializer, FieldIdsSerializer, ScenarioIdsSerializer
 from ..service.google_sheet_integration import get_sheet_config_data, get_funnel_info_from_integration_table
+from ..service.skorozvon_integration import skorozvon_api
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -80,7 +81,28 @@ def sync_google_sheets_data_to_db():
             sync_field_ids(name, data)
 
 
+def sync_skorozvon_data():
+    scenarios = skorozvon_api.get_scenarios()
+    for scenario_id, scenario_name in scenarios.items():
+        data = {
+            "scenario_id": scenario_id,
+            "scenario_name": scenario_name,
+        }
+        if ScenarioIds.objects.filter(scenario_id=scenario_id).exists():
+            instance = ScenarioIds.objects.get(scenario_id=scenario_id)
+            serializer = ScenarioIdsSerializer(instance)
+            if serializer["scenario_name"] != data["scenario_name"]:
+                serializer.update(instance, data)
+        else:
+            create_object(ScenarioIdsSerializer, data)
+
+
+def sync_data():
+    sync_skorozvon_data()
+    sync_google_sheets_data_to_db()
+
+
 def start():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(sync_google_sheets_data_to_db, 'interval', minutes=1)
+    scheduler.add_job(sync_data, 'interval', minutes=1)
     scheduler.start()

@@ -17,6 +17,11 @@ class FieldIds(models.Model):
     bitrix_field_value = models.CharField(max_length=255)
 
 
+class ScenarioIds(models.Model):
+    scenario_id = models.CharField(max_length=255)
+    scenario_name = models.CharField(max_length=255)
+
+
 class CallDataInfo(models.Model):
     type = models.CharField(max_length=255)
 

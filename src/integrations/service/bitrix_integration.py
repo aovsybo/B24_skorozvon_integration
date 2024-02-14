@@ -7,10 +7,10 @@ from django.conf import settings
 
 from .exceptions import (
     UnsuccessfulLeadCreationError,
-    SideScenarioError,
-    CategoryKeyError,
+    CategoryNotFoundError,
+    ScenarioNotFoundError,
 )
-from ..models import FieldIds, IntegrationsData
+from ..models import FieldIds, IntegrationsData, ScenarioIds
 from .skorozvon_integration import skorozvon_api
 from .telegram_integration import send_message_to_dev_chat
 from .yandex_disk_integration import get_file_share_link
@@ -119,18 +119,11 @@ class BitrixDealCreationFields:
 
 @time_limit_signalization
 def create_bitrix_deal(lead_info: BitrixDealCreationFields):
-    call_id = lead_info.call_id
-    call_data = skorozvon_api.get_call_audio(call_id)
-    share_link = get_file_share_link(call_data, call_id)
-    scenarios = skorozvon_api.get_scenarios()
-    if int(lead_info.scenario_id) not in scenarios:
-        raise SideScenarioError(f"Scenario '{lead_info.scenario_id}' not in working scenarios")
-    elif lead_info.result_name.lower() not in settings.BITRIX_SUCCESSFUL_RESULT_NAMES:
+    if lead_info.result_name.lower() not in settings.BITRIX_SUCCESSFUL_RESULT_NAMES:
         raise UnsuccessfulLeadCreationError(f"Result name '{lead_info.result_name}' is not successful")
-    scenario_name = scenarios[int(lead_info.scenario_id)]
-    category_id = get_category_id(scenario_name)
-    if not category_id:
-        raise CategoryKeyError(f"Not found category according to scenario '{scenario_name}'")
+    category_id = get_category_id(lead_info.scenario_id)
+    call_data = skorozvon_api.get_call_audio(lead_info.call_id)
+    share_link = get_file_share_link(call_data, lead_info.call_id)
     data = {
         "fields": {
             "TITLE": lead_info.title,
@@ -146,21 +139,17 @@ def create_bitrix_deal(lead_info: BitrixDealCreationFields):
     return requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json=data)
 
 
-def check_categories():
-    objects = IntegrationsData.objects.all()
-    field_object = IntegrationsData._meta.get_field("skorozvon_scenario_name")
-    response = []
-    for instance in objects:
-        scenario_name = getattr(instance, field_object.attname)
-        response.append({scenario_name: get_category_id(scenario_name)})
-    return response
-
-
-def get_category_id(scenario_name):
+def get_category_id(scenario_id):
+    try:
+        scenario = ScenarioIds.objects.get(scenario_id=scenario_id)
+        searching_field = ScenarioIds._meta.get_field("scenario_name")
+        scenario_name = getattr(scenario, searching_field.attname)
+    except ScenarioIds.DoesNotExist:
+        raise ScenarioNotFoundError(f"Scenario {scenario_id} not found")
     try:
         integration = IntegrationsData.objects.get(skorozvon_scenario_name=scenario_name)
         searching_field = IntegrationsData._meta.get_field("stage_id")
         stage_id = getattr(integration, searching_field.attname)
     except IntegrationsData.DoesNotExist:
-        stage_id = ""
+        raise CategoryNotFoundError(f"Not found category according to scenario '{scenario_name}'")
     return stage_id.split(":")[0].strip("C") if ":" in stage_id else stage_id

@@ -35,19 +35,6 @@ class SkorozvonAPI:
             return response.content
         return response.json()
 
-    def get_call_info(self, call_id: int):
-        return self.get_request(f"calls/{call_id}")
-
-    def get_calls_list(self):
-        params = {
-            "page": 1,
-            "length": 100,
-            "sort_by_time": True,
-            "selected_fields":  ["id", "organization_id"],
-            "start_time": datetime.timestamp(datetime.utcnow() - timedelta(hours=2))
-        }
-        return self.get_request("calls", params)
-
     def get_call_audio(self, call_id: int):
         return self.get_request(f"calls/{call_id}.mp3", has_content=True)
 
