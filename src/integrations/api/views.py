@@ -62,13 +62,10 @@ class PhoneCallInfoAPI(CreateAPIView):
             result_name=serializer.data["call_result_result_name"],
         )
         try:
-            response = create_bitrix_deal(lead_info)
-            send_message_to_dev(response.text)
+            create_bitrix_deal(lead_info)
         except (ScenarioNotFoundError, UnsuccessfulLeadCreationError, CategoryNotFoundError) as e:
-            # send_message_to_dev(str(e))
             pass
         except Exception as e:
-            # send_message_to_dev(f"Внеплановая ошибка: \n{str(e)}")
             pass
         return Response(status=status.HTTP_201_CREATED)
 
