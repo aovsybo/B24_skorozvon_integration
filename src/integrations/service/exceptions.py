@@ -12,3 +12,7 @@ class UnsuccessfulLeadCreationError(BitrixDealCreation):
 
 class CategoryNotFoundError(BitrixDealCreation):
     pass
+
+
+class SkorozvonAPIError(BitrixDealCreation):
+    pass

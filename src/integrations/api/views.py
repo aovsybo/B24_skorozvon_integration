@@ -16,6 +16,7 @@ from ..service.exceptions import (
     ScenarioNotFoundError,
     UnsuccessfulLeadCreationError,
     CategoryNotFoundError,
+    SkorozvonAPIError,
 )
 from ..service.google_sheet_integration import (
     send_to_google_sheet,
@@ -63,7 +64,7 @@ class PhoneCallInfoAPI(CreateAPIView):
         )
         try:
             create_bitrix_deal(lead_info)
-        except (ScenarioNotFoundError, UnsuccessfulLeadCreationError, CategoryNotFoundError) as e:
+        except (ScenarioNotFoundError, UnsuccessfulLeadCreationError, CategoryNotFoundError, SkorozvonAPIError) as e:
             pass
         except Exception as e:
             pass

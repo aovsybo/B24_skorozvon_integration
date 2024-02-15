@@ -142,6 +142,7 @@ def create_bitrix_deal(lead_info: BitrixDealCreationFields):
         send_message_to_dev(category_id)
         return
 
+
 def get_category_id(scenario_id):
     try:
         scenario = ScenarioIds.objects.get(scenario_id=scenario_id)

@@ -1,8 +1,9 @@
-from datetime import timedelta, datetime
-
 import requests
 
 from django.conf import settings
+
+from ..service.telegram_integration import send_message_to_dev
+from ..service.exceptions import SkorozvonAPIError
 
 
 class SkorozvonAPI:
@@ -33,13 +34,20 @@ class SkorozvonAPI:
         response = requests.get(self.BASE_URL + endpoint_url, params=params, headers=headers)
         if has_content:
             return response.content
-        return response.json()
+        try:
+            return response.json()
+        except Exception as e:
+            send_message_to_dev(str(e))
+            send_message_to_dev(response.text)
+            return
 
     def get_call_audio(self, call_id: int):
         return self.get_request(f"calls/{call_id}.mp3", has_content=True)
 
     def get_scenarios(self):
         response = self.get_request("scenarios")
+        if not response:
+            raise SkorozvonAPIError("Skorozvon dont return anything")
         return {sc["id"]: sc["name"] for sc in response["data"]}
 
 
