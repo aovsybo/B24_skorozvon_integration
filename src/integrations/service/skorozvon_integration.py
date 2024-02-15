@@ -2,7 +2,6 @@ import requests
 
 from django.conf import settings
 
-from ..service.telegram_integration import send_message_to_dev
 from ..service.exceptions import SkorozvonAPIError
 
 
@@ -37,9 +36,7 @@ class SkorozvonAPI:
         try:
             return response.json()
         except Exception as e:
-            send_message_to_dev(str(e))
-            send_message_to_dev(response.text)
-            return
+            return None
 
     def get_call_audio(self, call_id: int):
         return self.get_request(f"calls/{call_id}.mp3", has_content=True)
