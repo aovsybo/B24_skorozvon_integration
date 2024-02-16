@@ -51,23 +51,23 @@ class PhoneCallInfoAPI(CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=self.flatten_data(request.data))
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        lead_info = BitrixDealCreationFields(
-            title="Лид",
-            call_id=serializer.data["call_id"],
-            name=serializer.data["lead_name"],
-            phone=serializer.data["lead_phones"],
-            comment=serializer.data["lead_comment"],
-            scenario_id=serializer.data["call_scenario_id"],
-            result_name=serializer.data["call_result_result_name"],
-        )
-        try:
-            create_bitrix_deal(lead_info)
-        except (ScenarioNotFoundError, UnsuccessfulLeadCreationError, CategoryNotFoundError, SkorozvonAPIError) as e:
-            pass
-        except Exception as e:
-            pass
+        if serializer.is_valid():
+            serializer.save()
+            lead_info = BitrixDealCreationFields(
+                title="Лид",
+                call_id=serializer.data["call_id"],
+                name=serializer.data["lead_name"],
+                phone=serializer.data["lead_phones"],
+                comment=serializer.data["lead_comment"],
+                scenario_id=serializer.data["call_scenario_id"],
+                result_name=serializer.data["call_result_result_name"],
+            )
+            try:
+                create_bitrix_deal(lead_info)
+            except (ScenarioNotFoundError, UnsuccessfulLeadCreationError, CategoryNotFoundError, SkorozvonAPIError):
+                pass
+            except Exception:
+                pass
         return Response(status=status.HTTP_201_CREATED)
 
 
