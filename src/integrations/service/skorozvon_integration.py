@@ -31,6 +31,7 @@ class SkorozvonAPI:
             "Authorization": self._token
         }
         response = requests.get(self.BASE_URL + endpoint_url, params=params, headers=headers)
+        # Логировать контент и хедеры
         if has_content:
             return response.content
         try:
