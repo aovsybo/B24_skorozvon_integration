@@ -1,3 +1,4 @@
+import json
 import logging
 
 from django.conf import settings
@@ -53,7 +54,7 @@ class PhoneCallInfoAPI(CreateAPIView):
         return out
 
     def post(self, request, *args, **kwargs):
-        # logger.info(request.data)
+        logger.info(json.dumps(request.data))
         serializer = self.serializer_class(data=self.flatten_data(request.data))
         if serializer.is_valid():
             serializer.save()
