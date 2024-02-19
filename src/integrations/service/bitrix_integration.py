@@ -136,10 +136,7 @@ def create_bitrix_deal(lead_info: BitrixDealCreationFields):
             "CATEGORY_ID": "94",
         }
     }
-    if category_id in ["5", "19", "21", "29", "31", "37", "94"]:
-        return requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json=data)
-    else:
-        return
+    return requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json=data)
 
 
 def get_category_id(scenario_id):
