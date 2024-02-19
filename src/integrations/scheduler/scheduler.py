@@ -37,13 +37,13 @@ def sync_integrations_data(integrations_data: dict):
         if integrations_data["Статус"][i] != "Подключить":
             continue
         current_integration = {
-            "project_name": integrations_data["Проекты"][i],
-            "stage_id": integrations_data["ID Стадии"][i],
+            "project_name": integrations_data["Проекты"][i].strip(),
+            "stage_id": integrations_data["ID Стадии"][i].strip(),
             "tg_bot_id": get_tg_chat_id(integrations_data["Телеграм бот:"][i]),
             "google_spreadsheet_id": get_spreadsheet_id_from_url(integrations_data["Ссылка на таблицу лидов [предыдущие]"][i]),
-            "sheet_name": integrations_data["Название листа"][i],
-            "previous_sheet_names": check_for_null(integrations_data["Названия прошлых листов"][i]),
-            "skorozvon_scenario_name": check_for_null(integrations_data["Имя сценария в скорозвоне"][i]),
+            "sheet_name": integrations_data["Название листа"][i].strip(),
+            "previous_sheet_names": check_for_null(integrations_data["Названия прошлых листов"][i]).strip(),
+            "skorozvon_scenario_name": check_for_null(integrations_data["Имя сценария в скорозвоне"][i]).strip(),
         }
         if IntegrationsData.objects.filter(project_name=current_integration["project_name"]).exists():
             instance = IntegrationsData.objects.get(project_name=current_integration["project_name"])
