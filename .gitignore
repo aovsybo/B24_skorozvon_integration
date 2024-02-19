@@ -3,5 +3,6 @@
 .env
 credentials.json
 token.json
+PhoneCallInfoAPI.log
 
 __pycache__/

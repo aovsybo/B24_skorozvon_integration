@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView
@@ -22,10 +24,11 @@ from ..service.google_sheet_integration import (
     send_to_google_sheet,
     is_unique_data,
 )
-from ..service.telegram_integration import send_message_to_tg, send_message_to_dev
+from ..service.telegram_integration import send_message_to_tg
 
 
 CURRENT_DEALS = []
+logger = logging.getLogger(__name__)
 
 
 class PhoneCallInfoAPI(CreateAPIView):
@@ -50,6 +53,7 @@ class PhoneCallInfoAPI(CreateAPIView):
         return out
 
     def post(self, request, *args, **kwargs):
+        logger.info(request.data)
         serializer = self.serializer_class(data=self.flatten_data(request.data))
         if serializer.is_valid():
             serializer.save()
@@ -125,6 +129,5 @@ class DealCreationHandlerAPI(APIView):
 
 class TestAPI(APIView):
     def get(self, request):
-        from ..service.skorozvon_integration import skorozvon_api
         data = dict()
         return Response(data=data, status=status.HTTP_200_OK)

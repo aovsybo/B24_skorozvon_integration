@@ -52,6 +52,24 @@ ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(',')
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
 
 # Application definition
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "PhoneCallInfoAPI.log"
+        },
+    },
+    "loggers": {
+        "integrations": {
+            "handlers": ["file"],
+            "level": "INFO",
+            "propagate": True,
+        },
+    }
+}
 
 INSTALLED_APPS = [
     'django.contrib.admin',
