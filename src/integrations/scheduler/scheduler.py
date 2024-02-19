@@ -98,8 +98,8 @@ def sync_skorozvon_data():
 
 
 def sync_data():
-    sync_skorozvon_data()
     sync_google_sheets_data_to_db()
+    sync_skorozvon_data()
 
 
 def start():
