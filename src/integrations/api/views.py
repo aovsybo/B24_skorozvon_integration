@@ -53,7 +53,7 @@ class PhoneCallInfoAPI(CreateAPIView):
         return out
 
     def post(self, request, *args, **kwargs):
-        logger.info(request.data)
+        # logger.info(request.data)
         serializer = self.serializer_class(data=self.flatten_data(request.data))
         if serializer.is_valid():
             serializer.save()
