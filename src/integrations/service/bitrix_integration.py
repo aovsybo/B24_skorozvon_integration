@@ -117,6 +117,40 @@ class BitrixDealCreationFields:
     result_name: str
 
 
+@dataclass
+class _BitrixDealCreationFields:
+    title: str
+    call_id: str
+    name: str
+    phone: str
+    comment: str
+    scenario_id: int
+    form: str
+    result_id: str
+
+
+@time_limit_signalization
+def _create_bitrix_deal(lead_info: BitrixDealCreationFields):
+    # if lead_info.result_name.lower() not in settings.BITRIX_SUCCESSFUL_RESULT_NAMES:
+    #     raise UnsuccessfulLeadCreationError(f"Result name '{lead_info.result_name}' is not successful")
+    category_id = get_category_id(lead_info.scenario_id)
+    call_data = skorozvon_api.get_call_audio(lead_info.call_id)
+    share_link = get_file_share_link(call_data, lead_info.call_id)
+    data = {
+        "fields": {
+            "TITLE": lead_info.title,
+            "UF_CRM_1664819061161": lead_info.name,
+            "UF_CRM_1665719874029": lead_info.phone,
+            "UF_CRM_1664819217017": share_link,
+            # "UF_CRM_1664819040131": lead_info.comment,
+            "UF_CRM_1664819040131": lead_info.form,
+            # "CATEGORY_ID": category_id,
+            "CATEGORY_ID": "94",
+        }
+    }
+    return requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json=data)
+
+
 @time_limit_signalization
 def create_bitrix_deal(lead_info: BitrixDealCreationFields):
     if lead_info.result_name.lower() not in settings.BITRIX_SUCCESSFUL_RESULT_NAMES:

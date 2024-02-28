@@ -8,10 +8,12 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from ..models import IntegrationsData
-from .serializers import CallDataInfoSerializer, IntegrationsDataSerializer
+from .serializers import CallDataInfoSerializer, IntegrationsDataSerializer, FormResponseSerializer
 from ..service.bitrix_integration import (
     BitrixDealCreationFields,
+    _BitrixDealCreationFields,
     create_bitrix_deal,
+    _create_bitrix_deal,
     get_deal_info,
     move_deal_to_doubles_stage,
 )
@@ -32,30 +34,67 @@ CURRENT_DEALS = []
 logger = logging.getLogger(__name__)
 
 
+def flatten_data(y):
+    out = {}
+
+    def flatten(x, name=''):
+        if type(x) is dict:
+            for a in x:
+                flatten(x[a], name + a + '_')
+        elif type(x) is list:
+            i = 0
+            for a in x:
+                flatten(a, name + str(i) + '_')
+                i += 1
+        else:
+            out[name[:-1]] = x
+
+    flatten(y)
+    return out
+
+
+class FormResponseAPI(CreateAPIView):
+    serializer_class = FormResponseSerializer
+
+    @staticmethod
+    def get_str_form_response(form_response: list):
+        return ";".join([
+            f"{question.get('question_name', '')}:{question.get('answer_values', '')[0]}"
+            for question in form_response
+        ])
+
+    def post(self, request, *args, **kwargs):
+        data = flatten_data(request.data)
+        data["form_response"] = self.get_str_form_response(request.data.get("form_response", "").get("answers", ""))
+        serializer = self.serializer_class(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            lead_info = _BitrixDealCreationFields(
+                title="Анкетный",
+                call_id=serializer.data["call_id"],
+                name=serializer.data["lead_name"],
+                phone=serializer.data["lead_phones"],
+                comment=serializer.data["lead_comment"],
+                scenario_id=serializer.data["call_scenario_id"],
+                form=serializer.data["form_response"],
+                result_id=serializer.data["call_result_id"],
+            )
+            try:
+                _create_bitrix_deal(lead_info)
+            except (ScenarioNotFoundError, UnsuccessfulLeadCreationError, CategoryNotFoundError, SkorozvonAPIError) as e:
+                print(e)
+            except Exception as e:
+                print(e)
+
+        return Response(data=data, status=status.HTTP_201_CREATED)
+
+
 class PhoneCallInfoAPI(CreateAPIView):
     serializer_class = CallDataInfoSerializer
 
-    @staticmethod
-    def flatten_data(y):
-        out = {}
-
-        def flatten(x, name=''):
-            if type(x) is dict:
-                for a in x:
-                    flatten(x[a], name + a + '_')
-            elif type(x) is list:
-                i = 0
-                for a in x:
-                    flatten(a, name + str(i) + '_')
-                    i += 1
-            else:
-                out[name[:-1]] = x
-        flatten(y)
-        return out
-
     def post(self, request, *args, **kwargs):
         logger.info(json.dumps(request.data))
-        serializer = self.serializer_class(data=self.flatten_data(request.data))
+        serializer = self.serializer_class(data=flatten_data(request.data))
         if serializer.is_valid():
             serializer.save()
             lead_info = BitrixDealCreationFields(

@@ -51,7 +51,6 @@ DEBUG = True
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(',')
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
 
-# Application definition
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -71,6 +70,7 @@ LOGGING = {
     }
 }
 
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
