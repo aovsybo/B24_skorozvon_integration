@@ -82,11 +82,11 @@ class FormResponseAPI(CreateAPIView):
             try:
                 _create_bitrix_deal(lead_info)
             except (ScenarioNotFoundError, UnsuccessfulLeadCreationError, CategoryNotFoundError, SkorozvonAPIError) as e:
-                print(e)
+                pass
             except Exception as e:
-                print(e)
+                pass
 
-        return Response(data=data, status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_201_CREATED)
 
 
 class PhoneCallInfoAPI(CreateAPIView):
