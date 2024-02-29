@@ -69,7 +69,6 @@ class FormResponseAPI(CreateAPIView):
         logger.info(json.dumps(request.data))
         data = flatten_data(request.data)
         data["form_response"] = self.get_str_form_response(request.data.get("form_response", "").get("answers", ""))
-        print(data["form_response"])
         serializer = self.serializer_class(data=data)
         if serializer.is_valid():
             serializer.save()
