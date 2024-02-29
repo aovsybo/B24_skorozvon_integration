@@ -89,13 +89,13 @@ def sync_google_sheets_data_to_db():
 
 
 def sync_id_to_name_data(sheets_data: dict, model, serializer_class, field_id_title: str, field_name_title: str):
-    for field_name, field_id in sheets_data.items():
+    for field_id, field_name in sheets_data.items():
         data = {
-            field_id_title: field_name,
-            field_name_title: field_id,
+            field_id_title: field_id,
+            field_name_title: field_name,
         }
-        if model.objects.filter(**{field_id_title: field_name}).exists():
-            instance = model.objects.get(**{field_id_title: field_name})
+        if model.objects.filter(**{field_name_title: field_name}).exists():
+            instance = model.objects.get(**{field_name_title: field_name})
             serializer = serializer_class(instance)
             if serializer[field_id_title] != data[field_id_title]:
                 serializer.update(instance, data)
@@ -105,35 +105,11 @@ def sync_id_to_name_data(sheets_data: dict, model, serializer_class, field_id_ti
 
 def sync_form_data(form_data: dict):
     sync_id_to_name_data(form_data, FormFieldIds, FormFieldIdsSerializer, "field_id", "field_name")
-    # for field_name, field_id in form_data.items():
-    #     data = {
-    #         "field_name": field_name,
-    #         "field_id": field_id,
-    #     }
-    #     if FormFieldIds.objects.filter(field_name=field_name).exists():
-    #         instance = FormFieldIds.objects.get(field_name=field_name)
-    #         serializer = FormFieldIdsSerializer(instance)
-    #         if serializer["field_id"] != data["field_id"]:
-    #             serializer.update(instance, data)
-    #     else:
-    #         create_object(FieldIdsSerializer, data)
 
 
 def sync_skorozvon_data():
     scenarios = skorozvon_api.get_scenarios()
     sync_id_to_name_data(scenarios, ScenarioIds, ScenarioIdsSerializer, "scenario_id", "scenario_name")
-    # for scenario_id, scenario_name in scenarios.items():
-    #     data = {
-    #         "scenario_id": scenario_id,
-    #         "scenario_name": scenario_name,
-    #     }
-    #     if ScenarioIds.objects.filter(scenario_id=scenario_id).exists():
-    #         instance = ScenarioIds.objects.get(scenario_id=scenario_id)
-    #         serializer = ScenarioIdsSerializer(instance)
-    #         if serializer["scenario_name"] != data["scenario_name"]:
-    #             serializer.update(instance, data)
-    #     else:
-    #         create_object(ScenarioIdsSerializer, data)
 
 
 def sync_data():

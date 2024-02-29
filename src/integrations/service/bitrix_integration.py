@@ -10,9 +10,10 @@ from .exceptions import (
     CategoryNotFoundError,
     ScenarioNotFoundError,
 )
-from ..models import FieldIds, IntegrationsData, ScenarioIds
+from ..models import FieldIds, IntegrationsData, ScenarioIds, FormFieldIds
+from ..api.serializers import FormFieldIdsSerializer
 from .skorozvon_integration import skorozvon_api
-from .telegram_integration import send_message_to_dev_chat, send_message_to_dev
+from .telegram_integration import send_message_to_dev_chat
 from .yandex_disk_integration import get_file_share_link
 
 
@@ -142,18 +143,21 @@ def _create_bitrix_deal(lead_info: _BitrixDealCreationFields):
             "UF_CRM_1664819061161": lead_info.name,
             "UF_CRM_1665719874029": lead_info.phone,
             "UF_CRM_1664819217017": share_link,
-            # "UF_CRM_1664819040131": lead_info.comment,
-            "UF_CRM_1664819040131": lead_info.form,
+            "UF_CRM_1664819040131": lead_info.comment,
             # "CATEGORY_ID": category_id,
             "CATEGORY_ID": "94",
         }
     }
-    # TODO: check if symbol is unique
     for qa in lead_info.form.split(";"):
         question, answer = qa.split(":")
-        if question in field_names:
-            data["fields"][field_code] = answer
-
+        field_id = get_field_id_by_field_name(question)
+        if field_id:
+            if FieldIds.objects.filter(bitrix_field_name=question, bitrix_field_value=answer).exists():
+                instance = FieldIds.objects.get(bitrix_field_name=question, bitrix_field_value=answer)
+                searching_field = FieldIds._meta.get_field("bitrix_field_id")
+                data["fields"][field_id] = getattr(instance, searching_field.attname)
+            else:
+                data["fields"][field_id] = answer
     return requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json=data)
 
 
@@ -177,6 +181,14 @@ def create_bitrix_deal(lead_info: BitrixDealCreationFields):
         }
     }
     return requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json=data)
+
+
+def get_field_id_by_field_name(field_name: str) -> str:
+    if FormFieldIds.objects.filter(field_name=field_name).exists():
+        instance = FormFieldIds.objects.get(field_name=field_name)
+        searching_field = FormFieldIds._meta.get_field("field_id")
+        return getattr(instance, searching_field.attname)
+    return ""
 
 
 def get_category_id(scenario_id):
