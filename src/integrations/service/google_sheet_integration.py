@@ -34,11 +34,12 @@ def get_service():
 def get_sheet_config_data():
     """
     Функция возвращает данные с листа конфигурации
+    в формате название таблицы: {поле: значение, поле: значение}
     """
     config_data = dict()
     config_sheet_data = get_table_data(
-        "1Q1j1o900Iozcd_OOEIzbMkGO4GcRPqa3BehoDHw3KHQ",
-        "Конфигурация",
+        settings.INTEGRATIONS_SPREADSHEET_ID,
+        settings.CONFIG_SHEET_NAME,
     )
     for i, name in enumerate([config_header for config_header in config_sheet_data[0] if config_header]):
         config_data[name] = {

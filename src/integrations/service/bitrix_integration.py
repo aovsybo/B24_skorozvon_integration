@@ -130,10 +130,10 @@ class _BitrixDealCreationFields:
 
 
 @time_limit_signalization
-def _create_bitrix_deal(lead_info: BitrixDealCreationFields):
+def _create_bitrix_deal(lead_info: _BitrixDealCreationFields):
     # if lead_info.result_name.lower() not in settings.BITRIX_SUCCESSFUL_RESULT_NAMES:
     #     raise UnsuccessfulLeadCreationError(f"Result name '{lead_info.result_name}' is not successful")
-    category_id = get_category_id(lead_info.scenario_id)
+    # category_id = get_category_id(lead_info.scenario_id)
     call_data = skorozvon_api.get_call_audio(lead_info.call_id)
     share_link = get_file_share_link(call_data, lead_info.call_id)
     data = {
@@ -148,6 +148,12 @@ def _create_bitrix_deal(lead_info: BitrixDealCreationFields):
             "CATEGORY_ID": "94",
         }
     }
+    # TODO: check if symbol is unique
+    for qa in lead_info.form.split(";"):
+        question, answer = qa.split(":")
+        if question in field_names:
+            data["fields"][field_code] = answer
+
     return requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json=data)
 
 

@@ -22,6 +22,11 @@ class ScenarioIds(models.Model):
     scenario_name = models.CharField(max_length=255)
 
 
+class FormFieldIds(models.Model):
+    field_id = models.CharField(max_length=255)
+    field_name = models.CharField(max_length=255)
+
+
 class CallDataInfo(models.Model):
     type = models.CharField(max_length=255, null=True, blank=True)
 

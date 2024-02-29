@@ -170,4 +170,6 @@ class DealCreationHandlerAPI(APIView):
 class TestAPI(APIView):
     def get(self, request):
         data = dict()
+        from ..scheduler.scheduler import sync_data
+        data["d"] = sync_data()
         return Response(data=data, status=status.HTTP_200_OK)

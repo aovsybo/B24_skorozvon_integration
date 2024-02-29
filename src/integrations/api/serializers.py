@@ -1,6 +1,12 @@
 from rest_framework import serializers
 
-from ..models import CallDataInfo, IntegrationsData, FieldIds, ScenarioIds, FormResponse
+from ..models import CallDataInfo, IntegrationsData, FieldIds, ScenarioIds, FormResponse, FormFieldIds
+
+
+class FormFieldIdsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FormFieldIds
+        fields = '__all__'
 
 
 class FieldIdsSerializer(serializers.ModelSerializer):
