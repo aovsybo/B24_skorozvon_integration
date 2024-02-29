@@ -152,8 +152,8 @@ def _create_bitrix_deal(lead_info: _BitrixDealCreationFields):
         question, answer = qa.split(":")
         field_id = get_field_id_by_field_name(question)
         if field_id:
-            if FieldIds.objects.filter(bitrix_field_name=question, bitrix_field_value=answer).exists():
-                instance = FieldIds.objects.get(bitrix_field_name=question, bitrix_field_value=answer)
+            if FieldIds.objects.filter(bitrix_field_name__iexact=question, bitrix_field_value__iexact=answer).exists():
+                instance = FieldIds.objects.get(bitrix_field_name__iexact=question, bitrix_field_value__iexact=answer)
                 searching_field = FieldIds._meta.get_field("bitrix_field_id")
                 data["fields"][field_id] = getattr(instance, searching_field.attname)
             else:
@@ -184,8 +184,8 @@ def create_bitrix_deal(lead_info: BitrixDealCreationFields):
 
 
 def get_field_id_by_field_name(field_name: str) -> str:
-    if FormFieldIds.objects.filter(field_name=field_name).exists():
-        instance = FormFieldIds.objects.get(field_name=field_name)
+    if FormFieldIds.objects.filter(field_name__iexact=field_name).exists():
+        instance = FormFieldIds.objects.get(field_name__iexact=field_name)
         searching_field = FormFieldIds._meta.get_field("field_id")
         return getattr(instance, searching_field.attname)
     return ""
