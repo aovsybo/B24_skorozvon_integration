@@ -58,14 +58,18 @@ class FormResponseAPI(CreateAPIView):
 
     @staticmethod
     def get_str_form_response(form_response: list):
-        return ";".join([
-            f"{question.get('question_name', '')}:{question.get('answer_values', '')[0]}"
+        return settings.FORM_SPLIT_QUESTION_SYMBOL.join([
+            f"{question.get('question_name', '').replace(settings.FORM_SPLIT_ANSWER_SYMBOL, '')}"
+            f"{settings.FORM_SPLIT_ANSWER_SYMBOL}"
+            f"{question.get('answer_values', '')[0]}"
             for question in form_response
         ])
 
     def post(self, request, *args, **kwargs):
+        logger.info(json.dumps(request.data))
         data = flatten_data(request.data)
         data["form_response"] = self.get_str_form_response(request.data.get("form_response", "").get("answers", ""))
+        print(data["form_response"])
         serializer = self.serializer_class(data=data)
         if serializer.is_valid():
             serializer.save()
@@ -81,11 +85,10 @@ class FormResponseAPI(CreateAPIView):
             )
             try:
                 _create_bitrix_deal(lead_info)
-            except (ScenarioNotFoundError, UnsuccessfulLeadCreationError, CategoryNotFoundError, SkorozvonAPIError) as e:
+            except (ScenarioNotFoundError, UnsuccessfulLeadCreationError, CategoryNotFoundError, SkorozvonAPIError):
                 pass
-            except Exception as e:
+            except Exception:
                 pass
-
         return Response(status=status.HTTP_201_CREATED)
 
 
@@ -170,6 +173,4 @@ class DealCreationHandlerAPI(APIView):
 class TestAPI(APIView):
     def get(self, request):
         data = dict()
-        from ..scheduler.scheduler import sync_data
-        data["d"] = sync_data()
         return Response(data=data, status=status.HTTP_200_OK)

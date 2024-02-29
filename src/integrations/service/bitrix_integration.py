@@ -148,8 +148,8 @@ def _create_bitrix_deal(lead_info: _BitrixDealCreationFields):
             "CATEGORY_ID": "94",
         }
     }
-    for qa in lead_info.form.split(";"):
-        question, answer = qa.split(":")
+    for qa in lead_info.form.split(settings.FORM_SPLIT_QUESTION_SYMBOL):
+        question, answer = qa.split(settings.FORM_SPLIT_ANSWER_SYMBOL)
         field_id = get_field_id_by_field_name(question)
         if field_id:
             if FieldIds.objects.filter(bitrix_field_name__iexact=question, bitrix_field_value__iexact=answer).exists():

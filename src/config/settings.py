@@ -45,6 +45,9 @@ TG_API_TOKEN = os.environ.get("TG_API_TOKEN")
 TG_DEV_ACCOUNT = os.environ.get("TG_DEV_ACCOUNT")
 TG_DEV_CHAT = os.environ.get("TG_DEV_CHAT")
 
+FORM_SPLIT_QUESTION_SYMBOL = "\n\n"
+FORM_SPLIT_ANSWER_SYMBOL = "\n"
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
