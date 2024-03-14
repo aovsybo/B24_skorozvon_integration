@@ -143,9 +143,9 @@ def _create_bitrix_deal(lead_info: _BitrixDealCreationFields):
             "UF_CRM_1664819061161": lead_info.name,
             "UF_CRM_1665719874029": lead_info.phone,
             "UF_CRM_1664819217017": share_link,
-            "UF_CRM_1664819040131": lead_info.comment,
+            "UF_CRM_1664819040131": lead_info.scenario_id,
+            "CATEGORY_ID": "94",
             # "CATEGORY_ID": category_id,
-            "CATEGORY_ID": category_id,
         }
     }
     for qa in lead_info.form.split(settings.FORM_SPLIT_QUESTION_SYMBOL):
