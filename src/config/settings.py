@@ -40,7 +40,11 @@ INTEGRATIONS_SHEET_NAME = "таблицы проектов"
 CONFIG_SHEET_NAME = "Конфигурация"
 CONFIG_SHEET_FIELDS = ["Тип лида", "Квалификация лида", "Город", "Страна"]
 PHONE_FIELD_NAMES = ["Тел", "Номер абонента", "Телефон Лида", "Номер", "Телефон"]
+INVALID_LEADS_SHEET_ID = os.environ.get("INVALID_LEADS_SHEET_ID")
+INVALID_LEADS_SHEET_NAME = "Контроль Лидов 2024"
 
+
+TG_INVALID_LEADS_CHAT = os.environ.get("INVALID_LEADS_SHEET_ID")
 TG_API_TOKEN = os.environ.get("TG_API_TOKEN")
 TG_DEV_ACCOUNT = os.environ.get("TG_DEV_ACCOUNT")
 TG_DEV_CHAT = os.environ.get("TG_DEV_CHAT")

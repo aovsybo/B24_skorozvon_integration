@@ -18,17 +18,28 @@ from .yandex_disk_integration import get_file_share_link
 from ..service.google_sheet_integration import send_to_google_sheet, is_unique_data
 
 
-def get_id_for_doubles_stage(stage_id: str):
+def get_id_for_stage_by_name(stage_id: str, stage_names: list[str]) -> list:
     if ":" in stage_id:
         funnel_id = stage_id.split(":")[0].strip("C")
     else:
         funnel_id = stage_id
     stages = requests.get(settings.BITRIX_GET_DEAL_CATEGORY_STAGES_LIST, params={"ID": funnel_id}).json()["result"]
-    doubles_id = [stage["STATUS_ID"] for stage in stages if stage["NAME"] == "Дубли"]
-    if doubles_id:
-        return doubles_id[0]
-    else:
-        return -1
+    stages_ids = [stage["STATUS_ID"] for stage in stages if stage["NAME"] in stage_names]
+    return stages_ids if stages_ids else []
+
+
+def get_id_for_doubles_stage(stage_id: str):
+    stage_ids = get_id_for_stage_by_name(stage_id, ["Дубли"])
+    if stage_ids:
+        return stage_ids[0]
+    return -1
+
+
+def get_ids_for_invalid_stages(stage_id: str):
+    stage_ids = get_id_for_stage_by_name(stage_id, ["Невостребованный лид", "Не прошёл KPI"])
+    if stage_ids:
+        return stage_id
+    return -1
 
 
 def move_deal_to_doubles_stage(deal_id: str, stage_id: str):
@@ -122,8 +133,8 @@ def get_suitable_integration(integrations_data: list[dict], deal_city: str) -> d
         for integration in integrations_data:
             suitable_integration = dict(integration)
             if (
-                    "МСК" in suitable_integration["sheet_name"] and deal_city == "Москва" or
-                    "МСК" not in suitable_integration["sheet_name"] and deal_city != "Москва"
+                "МСК" in suitable_integration["sheet_name"] and deal_city == "Москва" or
+                "МСК" not in suitable_integration["sheet_name"] and deal_city != "Москва"
             ):
                 break
         return suitable_integration
@@ -136,6 +147,15 @@ def handle_deal(deal_id: str):
     if not integrations_exist:
         return
     suitable_integration = get_suitable_integration(integrations_data, deal_info.city)
+    if deal_info.stage_id != suitable_integration["stage_id"]:
+        if deal_info.stage_id in get_ids_for_invalid_stages(deal_info.stage_id):
+            send_to_google_sheet(
+                deal_info,
+                settings.INVALID_LEADS_SHEET_ID,
+                settings.INVALID_LEADS_SHEET_NAME,
+            )
+            send_message_to_tg(deal_info, settings.TG_INVALID_LEADS_CHAT)
+        return
     if suitable_integration["previous_sheet_names"]:
         previous_sheet_names = str(suitable_integration["previous_sheet_names"]).split(", ")
     else:
