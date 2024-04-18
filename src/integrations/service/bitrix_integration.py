@@ -53,8 +53,8 @@ def move_deal_to_doubles_stage(deal_id: str, stage_id: str):
 
 
 def get_deal_info(deal_id) -> BitrixDeal:
-    response = requests.get(settings.BITRIX_GET_DEAL_BY_ID, params={"ID": deal_id}).json()["result"]
-    return BitrixDeal.model_validate(response)
+    response = requests.get(settings.BITRIX_GET_DEAL_BY_ID, params={"ID": deal_id}).content
+    return BitrixDeal.model_validate_json(response)
 
 
 def time_limit_signalization(func):
