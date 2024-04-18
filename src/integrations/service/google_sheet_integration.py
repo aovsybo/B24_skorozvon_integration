@@ -94,12 +94,24 @@ def get_funnel_info_from_integration_table():
     return df[request_columns]
 
 
-def insert_data_by_stage(deal_info: BitrixDeal):
+def insert_data_by_stage(deal_info: BitrixDeal, is_invalid_stage: bool):
     """
     Приводим данные к форме для записи в гугл таблицу
     Для некоторых вороноке обозначены свои формы
     """
-    if deal_info.stage_id in ["C21:EXECUTING", "C37:EXECUTING"]:
+    if is_invalid_stage:
+        insert_data = [
+            deal_info.date,
+            "",  ## для записи вручную
+            "Название проекта",
+            "Ссылка на лид",
+            deal_info.lead_name,
+            deal_info.phone,
+            f"Имя: {deal_info.lead_name}. Комментарий: {deal_info.lead_comment}",
+            f"Доп. Комментарий",
+            deal_info.link_to_audio,
+        ]
+    elif deal_info.stage_id in ["C21:EXECUTING", "C37:EXECUTING"]:
         # Для [П5]
         insert_data = [
             deal_info.date,
@@ -114,7 +126,7 @@ def insert_data_by_stage(deal_info: BitrixDeal):
         insert_data = [
             deal_info.date,
             "",  ## для записи вручную
-            deal_info['phone'],
+            deal_info.phone,
             f"Имя: {deal_info.lead_name}. Комментарий: {deal_info.lead_comment}",
             deal_info['link_to_audio'],
             deal_info['country'],
@@ -164,12 +176,12 @@ def is_unique_data(phone: str, table_link: str, sheet_name: str, previous_sheet_
     return True
 
 
-def send_to_google_sheet(deal_info: BitrixDeal, spreadsheet_id: str, sheet_name: str):
+def send_to_google_sheet(deal_info: BitrixDeal, spreadsheet_id: str, sheet_name: str, is_invalid_stage=bool):
     """
     Отправляем данные в гугл таблицу по указанному айди таблицы и названию листа
     """
     service = get_service()
-    insert_data = insert_data_by_stage(deal_info)
+    insert_data = insert_data_by_stage(deal_info, is_invalid_stage)
     body = {
         "values": [insert_data]
     }

@@ -144,7 +144,7 @@ def get_suitable_integration(integrations_data: list[dict], deal_city: str) -> d
 # C94:UC_18RR0D
 
 def get_working_stage(stage_id: str):
-    return stage_id.split(":")[0] + "EXECUTING" if ":" in stage_id else "UC_MU7K9Y"
+    return stage_id.split(":")[0] + ":EXECUTING" if ":" in stage_id else "UC_MU7K9Y"
 
 
 def handle_deal(deal_id: str):
@@ -160,6 +160,7 @@ def handle_deal(deal_id: str):
                 deal_info,
                 settings.INVALID_LEADS_SHEET_ID,
                 settings.INVALID_LEADS_SHEET_NAME,
+                is_invalid_stage=True,
             )
             send_message_to_tg(deal_info, settings.TG_INVALID_LEADS_CHAT)
         return
@@ -177,6 +178,7 @@ def handle_deal(deal_id: str):
             deal_info,
             suitable_integration["google_spreadsheet_id"],
             suitable_integration["sheet_name"],
+            is_invalid_stage=False,
         )
         send_message_to_tg(deal_info, suitable_integration["tg_bot_id"])
     else:

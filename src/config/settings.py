@@ -44,7 +44,7 @@ INVALID_LEADS_SHEET_ID = os.environ.get("INVALID_LEADS_SHEET_ID")
 INVALID_LEADS_SHEET_NAME = "Контроль Лидов 2024"
 
 
-TG_INVALID_LEADS_CHAT = os.environ.get("INVALID_LEADS_SHEET_ID")
+TG_INVALID_LEADS_CHAT = os.environ.get("TG_INVALID_LEADS_CHAT")
 TG_API_TOKEN = os.environ.get("TG_API_TOKEN")
 TG_DEV_ACCOUNT = os.environ.get("TG_DEV_ACCOUNT")
 TG_DEV_CHAT = os.environ.get("TG_DEV_CHAT")
