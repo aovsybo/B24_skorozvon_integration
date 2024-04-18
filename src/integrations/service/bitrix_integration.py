@@ -140,10 +140,17 @@ def get_suitable_integration(integrations_data: list[dict], deal_city: str) -> d
         return suitable_integration
     return integrations_data[0]
 
+# C94:UC_MHV2PC
+# C94:UC_18RR0D
+
+def get_working_stage(stage_id: str):
+    return stage_id.split(":")[0] + "EXECUTING" if ":" in stage_id else "UC_MU7K9Y"
+
 
 def handle_deal(deal_id: str):
     deal_info = get_deal_info(deal_id)
-    integrations_data, integrations_exist = get_integrations_if_exist(deal_info.stage_id)
+    working_stage = get_working_stage(deal_info.stage_id)
+    integrations_data, integrations_exist = get_integrations_if_exist(working_stage)
     if not integrations_exist:
         return
     suitable_integration = get_suitable_integration(integrations_data, deal_info.city)
