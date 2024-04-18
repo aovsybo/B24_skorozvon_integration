@@ -38,35 +38,35 @@ class BitrixDeal(BaseModel):
     car_mark: str = Field(validation_alias=AliasPath("result", "UF_CRM_1694678311862"), default="")
     car_model: str = Field(validation_alias=AliasPath("result", "UF_CRM_1694678343732"), default="")
 
-    # @field_validator("lead_type")
-    # def lead_type_validator(cls, lead_type):
-    #     return get_field_value_by_id("Тип лида", lead_type)
-    #
-    # @field_validator("lead_qualification")
-    # def lead_qualification_validator(cls, lead_qualification):
-    #     return get_field_value_by_id("Квалификация лида", lead_qualification)
-    #
-    # @field_validator("city")
-    # def city_validator(cls, city):
-    #     return get_field_value_by_id("Город", city)
-    #
-    # @field_validator("country")
-    # def country_validator(cls, country):
-    #     return get_field_value_by_id("Страна", country)
-    #
-    # @field_validator("phone")
-    # def phone_validator(cls, phone):
-    #     remove_symbols = "+_-() "
-    #     for symbol in remove_symbols:
-    #         phone = phone.replace(symbol, "")
-    #     if phone:
-    #         return f"7{phone[-10:]}"
-    #     return phone
-    #
-    # # TODO: datetime.fromisoformat
-    # @field_validator("date")
-    # def data_validator(cls, date):
-    #     return ".".join(date.split("T")[0].split("-")[::-1])
+    @field_validator("lead_type")
+    def lead_type_validator(cls, lead_type):
+        return get_field_value_by_id("Тип лида", lead_type)
+
+    @field_validator("lead_qualification")
+    def lead_qualification_validator(cls, lead_qualification):
+        return get_field_value_by_id("Квалификация лида", lead_qualification)
+
+    @field_validator("city")
+    def city_validator(cls, city):
+        return get_field_value_by_id("Город", city)
+
+    @field_validator("country")
+    def country_validator(cls, country):
+        return get_field_value_by_id("Страна", country)
+
+    @field_validator("phone")
+    def phone_validator(cls, phone):
+        remove_symbols = "+_-() "
+        for symbol in remove_symbols:
+            phone = phone.replace(symbol, "")
+        if phone:
+            return f"7{phone[-10:]}"
+        return phone
+
+    # TODO: datetime.fromisoformat
+    @field_validator("date")
+    def data_validator(cls, date):
+        return ".".join(date.split("T")[0].split("-")[::-1])
 
 
 def flatten_data(y):
