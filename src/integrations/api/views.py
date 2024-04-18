@@ -2,6 +2,7 @@ import json
 import logging
 
 from django.conf import settings
+from django.core.cache import cache
 from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
@@ -30,7 +31,6 @@ from ..service.google_sheet_integration import (
 from ..service.telegram_integration import send_message_to_tg
 
 
-CURRENT_DEALS = []
 logger = logging.getLogger(__name__)
 
 
@@ -68,7 +68,7 @@ class FormResponseAPI(CreateAPIView):
     def post(self, request, *args, **kwargs):
         logger.info(json.dumps(request.data))
         data = flatten_data(request.data)
-        data["form_response"] = self.get_str_form_response(request.data.get("form_response", "").get("answers", ""))
+        data["form_response"] = self.get_str_form_response(request.data.get("form_response", dict()).get("answers", ""))
         serializer = self.serializer_class(data=data)
         if serializer.is_valid():
             serializer.save()
@@ -120,6 +120,10 @@ class PhoneCallInfoAPI(CreateAPIView):
 class DealCreationHandlerAPI(APIView):
     def post(self, request):
         deal_id = request.data["data[FIELDS][ID]"]
+        cached_deal_id = cache.get(deal_id)
+        if cached_deal_id:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        cache.set(deal_id, True, timeout=30)
         # Проверяем соответствие передаваемого ключа и ключа битрикса
         # А также проверяем, не идет ли уже работа по данной сделке, чтобы не отправлять два раза на случай дубля
         if request.data["auth[application_token]"] != settings.BITRIX_APP_TOKEN or deal_id in CURRENT_DEALS:
@@ -165,11 +169,10 @@ class DealCreationHandlerAPI(APIView):
                 send_message_to_tg(data, integration_data["tg_bot_id"])
             else:
                 move_deal_to_doubles_stage(deal_id, data["stage_id"])
-        CURRENT_DEALS.remove(deal_id)
+        cache.delete(deal_id)
         return Response(status=status.HTTP_200_OK)
 
 
 class TestAPI(APIView):
-    def get(self, request):
-        data = dict()
-        return Response(data=data, status=status.HTTP_200_OK)
+    def post(self, request):
+        return Response(status=status.HTTP_200_OK)
