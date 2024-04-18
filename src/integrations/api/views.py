@@ -8,6 +8,7 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
+from .permissions import AppTokenIsCorrect
 from ..models import IntegrationsData
 from .serializers import CallDataInfoSerializer, IntegrationsDataSerializer, FormResponseSerializer
 from ..service.bitrix_integration import (
@@ -29,7 +30,6 @@ from ..service.google_sheet_integration import (
     is_unique_data,
 )
 from ..service.telegram_integration import send_message_to_tg
-
 
 logger = logging.getLogger(__name__)
 
@@ -118,18 +118,17 @@ class PhoneCallInfoAPI(CreateAPIView):
 
 
 class DealCreationHandlerAPI(APIView):
+    permission_classes = [AppTokenIsCorrect]
+
     def post(self, request):
         deal_id = request.data["data[FIELDS][ID]"]
         cached_deal_id = cache.get(deal_id)
         if cached_deal_id:
             return Response(status=status.HTTP_403_FORBIDDEN)
         cache.set(deal_id, True, timeout=30)
-        # Проверяем соответствие передаваемого ключа и ключа битрикса
-        # А также проверяем, не идет ли уже работа по данной сделке, чтобы не отправлять два раза на случай дубля
         if request.data["auth[application_token]"] != settings.BITRIX_APP_TOKEN:
             return Response(status=status.HTTP_403_FORBIDDEN)
         data = get_deal_info(request.data["data[FIELDS][ID]"])
-        # Проверяем, находится ли данная стадия воронке в списке
         integration_by_id = IntegrationsData.objects.filter(stage_id=data["stage_id"])
         if integration_by_id.exists():
             if integration_by_id.count() > 1:
@@ -146,7 +145,8 @@ class DealCreationHandlerAPI(APIView):
                     ):
                         break
             else:
-                integration_data = IntegrationsDataSerializer(IntegrationsData.objects.get(stage_id=data["stage_id"])).data
+                integration_data = IntegrationsDataSerializer(
+                    IntegrationsData.objects.get(stage_id=data["stage_id"])).data
             # Проверяем, не является ли сделка дублем по номеру
             if integration_data["previous_sheet_names"]:
                 previous_sheet_names = str(integration_data["previous_sheet_names"]).split(", ")
