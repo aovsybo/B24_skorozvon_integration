@@ -9,6 +9,7 @@ from google.oauth2.credentials import Credentials
 from django.conf import settings
 
 from .telegram_integration import send_message_to_dev
+from .validation import BitrixDeal
 
 
 def get_service():
@@ -93,52 +94,52 @@ def get_funnel_info_from_integration_table():
     return df[request_columns]
 
 
-def validate_data(fields: dict, stage_id: str):
+def insert_data_by_stage(deal_info: BitrixDeal):
     """
     Приводим данные к форме для записи в гугл таблицу
     Для некоторых вороноке обозначены свои формы
     """
-    if stage_id in ["C21:EXECUTING", "C37:EXECUTING"]:
+    if deal_info.stage_id in ["C21:EXECUTING", "C37:EXECUTING"]:
         # Для [П5]
         insert_data = [
-            fields['date'],
+            deal_info.date,
             "",  ## для записи вручную
-            fields['phone'],
-            fields['city'],
-            f"Имя: {fields['lead_name']}. Комментарий: {fields['lead_comment']}",
-            fields['link_to_audio'],
+            deal_info.phone,
+            deal_info.city,
+            f"Имя: {deal_info.lead_name}. Комментарий: {deal_info.lead_comment}",
+            deal_info.link_to_audio,
         ]
-    elif stage_id == "C17:EXECUTING":
+    elif deal_info.stage_id == "C17:EXECUTING":
         # Для [П15]
         insert_data = [
-            fields['date'],
+            deal_info.date,
             "",  ## для записи вручную
-            fields['phone'],
-            f"Имя: {fields['lead_name']}. Комментарий: {fields['lead_comment']}",
-            fields['link_to_audio'],
-            fields['country'],
+            deal_info['phone'],
+            f"Имя: {deal_info.lead_name}. Комментарий: {deal_info.lead_comment}",
+            deal_info['link_to_audio'],
+            deal_info['country'],
         ]
-    elif stage_id == "C13:EXECUTING":
+    elif deal_info.stage_id == "C13:EXECUTING":
         # Для [П17]
         insert_data = [
-            fields['date'],
+            deal_info.date,
             "",  ## для записи вручную
-            fields['phone'],
-            fields['car_mark'],
-            fields['car_model'],
-            f"Имя: {fields['lead_name']}. Комментарий: {fields['lead_comment']}",
-            fields['link_to_audio'],
+            deal_info.phone,
+            deal_info.car_mark,
+            deal_info.car_model,
+            f"Имя: {deal_info.lead_name}. Комментарий: {deal_info.lead_comment}",
+            deal_info.link_to_audio,
         ]
     else:
         # Для остальных
         insert_data = [
-            fields['date'],
+            deal_info.date,
             "", ## для записи вручную
-            fields['lead_name'],
-            fields['phone'],
-            fields['lead_comment'],
-            f"{fields['lead_type']} | {fields['lead_qualification']}",
-            fields['link_to_audio'],
+            deal_info.lead_name,
+            deal_info.phone,
+            deal_info.lead_comment,
+            f"{deal_info.lead_type} | {deal_info.lead_qualification}",
+            deal_info.link_to_audio,
         ]
     return insert_data
 
@@ -163,16 +164,17 @@ def is_unique_data(phone: str, table_link: str, sheet_name: str, previous_sheet_
     return True
 
 
-def send_to_google_sheet(data: dict, stage_id: str, spreadsheet_id: str, sheet_name: str):
+def send_to_google_sheet(deal_info: BitrixDeal, spreadsheet_id: str, sheet_name: str):
     """
     Отправляем данные в гугл таблицу по указанному айди таблицы и названию листа
     """
     service = get_service()
+    insert_data = insert_data_by_stage(deal_info)
     body = {
-        "values": [validate_data(data, stage_id)]
+        "values": [insert_data]
     }
     result = service.spreadsheets().values().append(
-        spreadsheetId=spreadsheet_id, range=f"{sheet_name}!1:{len(data)}",
+        spreadsheetId=spreadsheet_id, range=f"{sheet_name}!1:{len(insert_data)}",
         valueInputOption="USER_ENTERED", body=body).execute()
     return result
 

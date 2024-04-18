@@ -1,34 +1,21 @@
-from dataclasses import dataclass
 from functools import wraps
 import requests
 import time
 
 from django.conf import settings
 
-from .exceptions import (
-    UnsuccessfulLeadCreationError,
-    CategoryNotFoundError,
-    ScenarioNotFoundError,
+from .db import (
+    get_integrations_if_exist,
+    get_category_id,
+    get_form_field_id_by_form_field_name,
+    get_bitrix_field_id,
 )
-from ..models import FieldIds, IntegrationsData, ScenarioIds, FormFieldIds
-from ..api.serializers import FormFieldIdsSerializer
+from .exceptions import UnsuccessfulLeadCreationError
 from .skorozvon_integration import skorozvon_api
-from .telegram_integration import send_message_to_dev_chat
+from .telegram_integration import send_message_to_dev_chat, send_message_to_tg
+from .validation import SkorozvonForm, SkorozvonCall, BitrixDeal
 from .yandex_disk_integration import get_file_share_link
-
-
-def convert_date_to_ru(date: str):
-    return ".".join(date.split("T")[0].split("-")[::-1])
-
-
-def unify_phone(phone: str):
-    # Приводим номер к единому формату
-    replace_symbols = "+-_() "
-    for replace_symbol in replace_symbols:
-        phone = phone.replace(replace_symbol, "")
-    if phone:
-        return f"7{phone[-10:]}"
-    return phone
+from ..service.google_sheet_integration import send_to_google_sheet, is_unique_data
 
 
 def get_id_for_doubles_stage(stage_id: str):
@@ -54,35 +41,9 @@ def move_deal_to_doubles_stage(deal_id: str, stage_id: str):
     )
 
 
-def get_field_value_by_id(field_name: str, field_id: str) -> str:
-    if field_id == "":
-        return ""
-    try:
-        field_pair = FieldIds.objects.get(bitrix_field_name=field_name, bitrix_field_id=field_id)
-        field_object = FieldIds._meta.get_field("bitrix_field_value")
-        field_value = getattr(field_pair, field_object.attname)
-    except FieldIds.DoesNotExist:
-        field_value = ""
-    return field_value
-
-
-def get_deal_info(deal_id):
-    deal = requests.get(settings.BITRIX_GET_DEAL_BY_ID, params={"ID": deal_id}).json()["result"]
-    response = {
-        "stage_id": deal["STAGE_ID"],
-        "lead_name": deal["UF_CRM_1664819061161"],
-        "phone": unify_phone(deal["UF_CRM_1665719874029"]),
-        "lead_type": get_field_value_by_id("Тип лида", deal["UF_CRM_1664819174514"]),
-        "lead_qualification": get_field_value_by_id("Квалификация лида", deal["UF_CRM_1664819117290"]),
-        "lead_comment": deal["UF_CRM_1664819040131"],
-        "link_to_audio": deal["UF_CRM_1664819217017"],
-        "date": convert_date_to_ru(deal["DATE_MODIFY"]),
-        "city": get_field_value_by_id("Город", deal["UF_CRM_1687464323171"]),
-        "country": get_field_value_by_id("Страна", deal["UF_CRM_1688409961271"]),
-        "car_mark": deal["UF_CRM_1694678311862"],
-        "car_model": deal["UF_CRM_1694678343732"],
-    }
-    return response
+def get_deal_info(deal_id) -> BitrixDeal:
+    response = requests.get(settings.BITRIX_GET_DEAL_BY_ID, params={"ID": deal_id}).json()["result"]
+    return BitrixDeal.model_validate(response.json())
 
 
 def time_limit_signalization(func):
@@ -104,65 +65,37 @@ def time_limit_signalization(func):
                 f"Загрузка аудиофайла по звонку {args[0]['call_id']} составила {upload_time_minutes}."
             )
         return result
+
     return wrap
 
 
-@dataclass
-class BitrixDealCreationFields:
-    title: str
-    call_id: str
-    name: str
-    phone: str
-    comment: str
-    scenario_id: int
-    result_name: str
-
-
-@dataclass
-class _BitrixDealCreationFields:
-    title: str
-    call_id: str
-    name: str
-    phone: str
-    comment: str
-    scenario_id: int
-    form: str
-    result_id: str
-
-
 @time_limit_signalization
-def _create_bitrix_deal(lead_info: _BitrixDealCreationFields):
+def create_bitrix_deal_by_form(lead_info: SkorozvonForm):
     # if lead_info.result_name.lower() not in settings.BITRIX_SUCCESSFUL_RESULT_NAMES:
     #     raise UnsuccessfulLeadCreationError(f"Result name '{lead_info.result_name}' is not successful")
     category_id = get_category_id(lead_info.scenario_id)
     call_data = skorozvon_api.get_call_audio(lead_info.call_id)
     share_link = get_file_share_link(call_data, lead_info.call_id)
     data = {
-        "fields": {
-            "TITLE": lead_info.title,
-            "UF_CRM_1664819061161": lead_info.name,
-            "UF_CRM_1665719874029": lead_info.phone,
-            "UF_CRM_1664819217017": share_link,
-            "UF_CRM_1664819040131": lead_info.scenario_id,
-            "CATEGORY_ID": "94",
-            # "CATEGORY_ID": category_id,
-        }
+        "TITLE": lead_info.title,
+        "UF_CRM_1664819061161": lead_info.name,
+        "UF_CRM_1665719874029": lead_info.phone,
+        "UF_CRM_1664819217017": share_link,
+        "UF_CRM_1664819040131": lead_info.scenario_id,
+        "CATEGORY_ID": "94",
+        # "CATEGORY_ID": category_id,
     }
     for qa in lead_info.form.split(settings.FORM_SPLIT_QUESTION_SYMBOL):
         question, answer = qa.split(settings.FORM_SPLIT_ANSWER_SYMBOL)
-        field_id = get_field_id_by_field_name(question)
-        if field_id:
-            if FieldIds.objects.filter(bitrix_field_name__iexact=question, bitrix_field_value__iexact=answer).exists():
-                instance = FieldIds.objects.get(bitrix_field_name__iexact=question, bitrix_field_value__iexact=answer)
-                searching_field = FieldIds._meta.get_field("bitrix_field_id")
-                data["fields"][field_id] = getattr(instance, searching_field.attname)
-            else:
-                data["fields"][field_id] = answer
-    return requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json=data)
+        form_field_id = get_form_field_id_by_form_field_name(question)
+        if form_field_id:
+            data[form_field_id] = get_bitrix_field_id(question, answer)
+
+    return requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json={"fields": data})
 
 
 @time_limit_signalization
-def create_bitrix_deal(lead_info: BitrixDealCreationFields):
+def create_bitrix_deal_by_call(lead_info: SkorozvonCall):
     if lead_info.result_name.lower() not in settings.BITRIX_SUCCESSFUL_RESULT_NAMES:
         raise UnsuccessfulLeadCreationError(f"Result name '{lead_info.result_name}' is not successful")
     category_id = get_category_id(lead_info.scenario_id)
@@ -183,25 +116,41 @@ def create_bitrix_deal(lead_info: BitrixDealCreationFields):
     return requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json=data)
 
 
-def get_field_id_by_field_name(field_name: str) -> str:
-    if FormFieldIds.objects.filter(field_name__iexact=field_name).exists():
-        instance = FormFieldIds.objects.get(field_name__iexact=field_name)
-        searching_field = FormFieldIds._meta.get_field("field_id")
-        return getattr(instance, searching_field.attname)
-    return ""
+def get_suitable_integration(integrations_data: list[dict], deal_city: str) -> dict:
+    if len(integrations_data) > 1:
+        suitable_integration = None
+        for integration in integrations_data:
+            suitable_integration = dict(integration)
+            if (
+                    "МСК" in suitable_integration["sheet_name"] and deal_city == "Москва" or
+                    "МСК" not in suitable_integration["sheet_name"] and deal_city != "Москва"
+            ):
+                break
+        return suitable_integration
+    return integrations_data[0]
 
 
-def get_category_id(scenario_id):
-    try:
-        scenario = ScenarioIds.objects.get(scenario_id=scenario_id)
-        searching_field = ScenarioIds._meta.get_field("scenario_name")
-        scenario_name = getattr(scenario, searching_field.attname)
-    except ScenarioIds.DoesNotExist:
-        raise ScenarioNotFoundError(f"Scenario {scenario_id} not found")
-    try:
-        integration = IntegrationsData.objects.get(skorozvon_scenario_name=scenario_name)
-        searching_field = IntegrationsData._meta.get_field("stage_id")
-        stage_id = getattr(integration, searching_field.attname)
-    except IntegrationsData.DoesNotExist:
-        raise CategoryNotFoundError(f"Not found category according to scenario '{scenario_name}'")
-    return stage_id.split(":")[0].strip("C") if ":" in stage_id else stage_id
+def handle_deal(deal_id: str):
+    deal_info = get_deal_info(deal_id)
+    integrations_data, integrations_exist = get_integrations_if_exist(deal_info.stage_id)
+    if not integrations_exist:
+        return
+    suitable_integration = get_suitable_integration(integrations_data, deal_info.city)
+    if suitable_integration["previous_sheet_names"]:
+        previous_sheet_names = str(suitable_integration["previous_sheet_names"]).split(", ")
+    else:
+        previous_sheet_names = []
+    if is_unique_data(
+            deal_info.phone,
+            suitable_integration["google_spreadsheet_id"],
+            suitable_integration["sheet_name"],
+            previous_sheet_names,
+    ):
+        send_to_google_sheet(
+            deal_info,
+            suitable_integration["google_spreadsheet_id"],
+            suitable_integration["sheet_name"],
+        )
+        send_message_to_tg(deal_info, suitable_integration["tg_bot_id"])
+    else:
+        move_deal_to_doubles_stage(deal_id, deal_info.stage_id)
