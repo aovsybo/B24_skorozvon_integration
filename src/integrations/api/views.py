@@ -126,8 +126,6 @@ class DealCreationHandlerAPI(APIView):
         if cached_deal_id:
             return Response(status=status.HTTP_403_FORBIDDEN)
         cache.set(deal_id, True, timeout=30)
-        if request.data["auth[application_token]"] != settings.BITRIX_APP_TOKEN:
-            return Response(status=status.HTTP_403_FORBIDDEN)
         data = get_deal_info(request.data["data[FIELDS][ID]"])
         integration_by_id = IntegrationsData.objects.filter(stage_id=data["stage_id"])
         if integration_by_id.exists():
