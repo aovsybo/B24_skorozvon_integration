@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, field_validator, Field, AliasPath
 
 from .db import get_field_value_by_id
@@ -63,10 +65,9 @@ class BitrixDeal(BaseModel):
             return f"7{phone[-10:]}"
         return phone
 
-    # TODO: datetime.fromisoformat
     @field_validator("date")
     def data_validator(cls, date):
-        return ".".join(date.split("T")[0].split("-")[::-1])
+        return datetime.fromisoformat(date).strftime("%Y-%m-%d")
 
 
 def flatten_data(y):
