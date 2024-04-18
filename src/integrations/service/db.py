@@ -35,7 +35,7 @@ def get_integrations_if_exist(stage_id: str) -> (list[dict], bool):
     integration_by_stage_id = IntegrationsData.objects.filter(stage_id=stage_id)
     integrations_exist = integration_by_stage_id.exists()
     if not integrations_exist:
-        return [], False, 0
+        return [], False
     integrations_data = IntegrationsDataSerializer(
         integration_by_stage_id,
         many=True
