@@ -126,10 +126,8 @@ class DealCreationHandlerAPI(APIView):
         cache.set(deal_id, True, timeout=30)
         # Проверяем соответствие передаваемого ключа и ключа битрикса
         # А также проверяем, не идет ли уже работа по данной сделке, чтобы не отправлять два раза на случай дубля
-        if request.data["auth[application_token]"] != settings.BITRIX_APP_TOKEN or deal_id in CURRENT_DEALS:
+        if request.data["auth[application_token]"] != settings.BITRIX_APP_TOKEN:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        else:
-            CURRENT_DEALS.append(request.data["data[FIELDS][ID]"])
         data = get_deal_info(request.data["data[FIELDS][ID]"])
         # Проверяем, находится ли данная стадия воронке в списке
         integration_by_id = IntegrationsData.objects.filter(stage_id=data["stage_id"])
