@@ -108,7 +108,7 @@ def insert_data_by_stage(deal_info: BitrixDeal, is_invalid_stage: bool):
             deal_info.lead_name,
             deal_info.phone,
             f"Имя: {deal_info.lead_name}. Комментарий: {deal_info.lead_comment}",
-            f"Доп. Комментарий",
+            f"{deal_info.lead_type} | {deal_info.lead_qualification}",
             deal_info.link_to_audio,
         ]
     elif deal_info.stage_id in ["C21:EXECUTING", "C37:EXECUTING"]:
