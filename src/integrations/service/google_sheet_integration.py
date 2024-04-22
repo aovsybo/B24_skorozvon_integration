@@ -99,7 +99,7 @@ def insert_data_by_stage(deal_info: BitrixDeal):
     Приводим данные к форме для записи в гугл таблицу
     Для некоторых вороноке обозначены свои формы
     """
-    if deal_info.is_valid_lead:
+    if not deal_info.is_valid_lead:
         insert_data = [
             deal_info.date,
             "",  ## для записи вручную

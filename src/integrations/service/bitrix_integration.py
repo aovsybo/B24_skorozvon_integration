@@ -158,6 +158,8 @@ def handle_deal(deal_id: str):
         deal_info.is_valid_lead = False
         integration = invalid_integration
     if is_unique_data(deal_info.phone, integration):
+        print(deal_info)
+        print(integration)
         send_to_google_sheet(deal_info, integration)
         send_message_to_tg(deal_info, integration)
     elif deal_info.is_valid_lead:
