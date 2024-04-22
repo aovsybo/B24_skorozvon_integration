@@ -137,8 +137,8 @@ def get_suitable_integration(deal_info: BitrixDeal) -> Integration | None:
         for integration in integrations_data:
             suitable_integration = Integration(**integration)
             if (
-                "МСК" in suitable_integration["sheet_name"] and deal_info.city == "Москва" or
-                "МСК" not in suitable_integration["sheet_name"] and deal_info.city != "Москва"
+                "МСК" in suitable_integration.sheet_name and deal_info.city == "Москва" or
+                "МСК" not in suitable_integration.sheet_name and deal_info.city != "Москва"
             ):
                 break
         return suitable_integration
