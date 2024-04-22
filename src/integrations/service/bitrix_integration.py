@@ -49,6 +49,7 @@ def move_deal_to_doubles_stage(deal_id: str, stage_id: str):
 
 def get_deal_info(deal_id) -> BitrixDeal:
     response = requests.get(settings.BITRIX_GET_DEAL_BY_ID, params={"ID": deal_id}).content
+    print(response)
     return BitrixDeal.model_validate_json(response)
 
 
@@ -150,7 +151,7 @@ def handle_deal(deal_id: str):
     if deal_info.stage_id != suitable_integration["stage_id"]:
         if deal_info.stage_id in get_ids_for_invalid_stages(deal_info.stage_id):
             deal_info.project_name = db.get_project_name_by_stage_id(working_stage)
-            deal_info.link_to_lead = "Ссылка на лид"
+            deal_info.link_to_lead = f"{settings.BITRIX_BASE_LEAD_URL}{deal_id}/"
             send_to_google_sheet(
                 deal_info,
                 settings.INVALID_LEADS_SHEET_ID,
