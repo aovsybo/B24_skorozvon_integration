@@ -103,8 +103,8 @@ def insert_data_by_stage(deal_info: BitrixDeal, is_invalid_stage: bool):
         insert_data = [
             deal_info.date,
             "",  ## для записи вручную
-            "Название проекта",
-            "Ссылка на лид",
+            deal_info.project_name,
+            deal_info.link_to_lead,
             deal_info.lead_name,
             deal_info.phone,
             f"Имя: {deal_info.lead_name}. Комментарий: {deal_info.lead_comment}",

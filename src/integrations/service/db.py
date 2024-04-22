@@ -57,3 +57,11 @@ def get_bitrix_field_id(question, answer):
         searching_field = FieldIds._meta.get_field("bitrix_field_id")
         return getattr(instance, searching_field.attname)
     return answer
+
+
+def get_project_name_by_stage_id(stage_id: str) -> str:
+    if IntegrationsData.objects.filter(stage_id=stage_id).exists():
+        instance = IntegrationsData.objects.get(stage_id=stage_id)
+        searching_field = IntegrationsData._meta.get_field("project_name")
+        return getattr(instance, searching_field.attname)
+    return "Ошибка получения проекта"

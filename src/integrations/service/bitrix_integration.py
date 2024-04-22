@@ -4,12 +4,7 @@ import time
 
 from django.conf import settings
 
-from .db import (
-    get_integrations_if_exist,
-    get_category_id,
-    get_form_field_id_by_form_field_name,
-    get_bitrix_field_id,
-)
+from . import db
 from .exceptions import UnsuccessfulLeadCreationError
 from .skorozvon_integration import skorozvon_api
 from .telegram_integration import send_message_to_dev_chat, send_message_to_tg
@@ -84,7 +79,7 @@ def time_limit_signalization(func):
 def create_bitrix_deal_by_form(lead_info: SkorozvonForm):
     # if lead_info.result_name.lower() not in settings.BITRIX_SUCCESSFUL_RESULT_NAMES:
     #     raise UnsuccessfulLeadCreationError(f"Result name '{lead_info.result_name}' is not successful")
-    category_id = get_category_id(lead_info.scenario_id)
+    category_id = db.get_category_id(lead_info.scenario_id)
     call_data = skorozvon_api.get_call_audio(lead_info.call_id)
     share_link = get_file_share_link(call_data, lead_info.call_id)
     data = {
@@ -98,9 +93,9 @@ def create_bitrix_deal_by_form(lead_info: SkorozvonForm):
     }
     for qa in lead_info.form.split(settings.FORM_SPLIT_QUESTION_SYMBOL):
         question, answer = qa.split(settings.FORM_SPLIT_ANSWER_SYMBOL)
-        form_field_id = get_form_field_id_by_form_field_name(question)
+        form_field_id = db.get_form_field_id_by_form_field_name(question)
         if form_field_id:
-            data[form_field_id] = get_bitrix_field_id(question, answer)
+            data[form_field_id] = db.get_bitrix_field_id(question, answer)
 
     return requests.post(url=settings.BITRIX_CREATE_DEAL_API_LINK, json={"fields": data})
 
@@ -109,7 +104,7 @@ def create_bitrix_deal_by_form(lead_info: SkorozvonForm):
 def create_bitrix_deal_by_call(lead_info: SkorozvonCall):
     if lead_info.result_name.lower() not in settings.BITRIX_SUCCESSFUL_RESULT_NAMES:
         raise UnsuccessfulLeadCreationError(f"Result name '{lead_info.result_name}' is not successful")
-    category_id = get_category_id(lead_info.scenario_id)
+    category_id = db.get_category_id(lead_info.scenario_id)
     call_data = skorozvon_api.get_call_audio(lead_info.call_id)
     share_link = get_file_share_link(call_data, lead_info.call_id)
     data = {
@@ -140,8 +135,6 @@ def get_suitable_integration(integrations_data: list[dict], deal_city: str) -> d
         return suitable_integration
     return integrations_data[0]
 
-# C94:UC_MHV2PC
-# C94:UC_18RR0D
 
 def get_working_stage(stage_id: str):
     return stage_id.split(":")[0] + ":EXECUTING" if ":" in stage_id else "UC_MU7K9Y"
@@ -150,12 +143,14 @@ def get_working_stage(stage_id: str):
 def handle_deal(deal_id: str):
     deal_info = get_deal_info(deal_id)
     working_stage = get_working_stage(deal_info.stage_id)
-    integrations_data, integrations_exist = get_integrations_if_exist(working_stage)
+    integrations_data, integrations_exist = db.get_integrations_if_exist(working_stage)
     if not integrations_exist:
         return
     suitable_integration = get_suitable_integration(integrations_data, deal_info.city)
     if deal_info.stage_id != suitable_integration["stage_id"]:
         if deal_info.stage_id in get_ids_for_invalid_stages(deal_info.stage_id):
+            deal_info.project_name = db.get_project_name_by_stage_id(working_stage)
+            deal_info.link_to_lead = "Ссылка на лид"
             send_to_google_sheet(
                 deal_info,
                 settings.INVALID_LEADS_SHEET_ID,

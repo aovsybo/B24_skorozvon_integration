@@ -39,6 +39,8 @@ class BitrixDeal(BaseModel):
     country: str = Field(validation_alias=AliasPath("result", "UF_CRM_1688409961271"), default="")
     car_mark: str = Field(validation_alias=AliasPath("result", "UF_CRM_1694678311862"), default="")
     car_model: str = Field(validation_alias=AliasPath("result", "UF_CRM_1694678343732"), default="")
+    project_name: str = Field(default="")
+    link_to_lead: str = Field(default="")
 
     @field_validator("lead_type")
     def lead_type_validator(cls, lead_type):
