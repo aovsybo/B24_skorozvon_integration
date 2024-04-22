@@ -153,7 +153,7 @@ def handle_deal(deal_id: str):
     if deal_info.stage_id != integration.stage_id:
         if deal_info.stage_id not in get_ids_for_invalid_stages(deal_info.stage_id):
             return
-        deal_info.project_name = db.get_project_name_by_stage_id(deal_info.working_stage)
+        deal_info.project_name = integration.project_name
         deal_info.link_to_lead = f"{settings.BITRIX_BASE_LEAD_URL}{deal_id}/"
         deal_info.is_valid_lead = False
         integration = invalid_integration
