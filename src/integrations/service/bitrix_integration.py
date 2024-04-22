@@ -142,7 +142,7 @@ def get_suitable_integration(deal_info: BitrixDeal) -> Integration | None:
             ):
                 break
         return suitable_integration
-    return Integration(**integrations_data[0])
+    return Integration(**(integrations_data[0]))
 
 
 def handle_deal(deal_id: str):
