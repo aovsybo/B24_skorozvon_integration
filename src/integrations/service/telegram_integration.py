@@ -2,12 +2,12 @@ import telebot
 
 from django.conf import settings
 
-from .validation import BitrixDeal
+from .validation import BitrixDeal, Integration
 
 bot = telebot.TeleBot(settings.TG_API_TOKEN)
 
 
-def send_message_to_tg(deal_info: BitrixDeal, receiver_id: str):
+def send_message_to_tg(deal_info: BitrixDeal, integration: Integration) -> None:
     message = f"""Новый лид: {deal_info.lead_name}_{deal_info.phone};\n
 Имя: {deal_info.lead_name};\n
 Телефон: {deal_info.phone};\n
@@ -15,7 +15,7 @@ def send_message_to_tg(deal_info: BitrixDeal, receiver_id: str):
 Доп. комментарий: {deal_info.lead_type} | {deal_info.lead_qualification};\n
 Ссылка на запись: {deal_info.link_to_audio};\n
 Дата лида: {deal_info.date};"""
-    send_message(message, receiver_id)
+    send_message(message, integration.tg_bot_id)
 
 
 def send_message_to_dev(message: str):

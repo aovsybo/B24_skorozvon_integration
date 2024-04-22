@@ -1,8 +1,23 @@
 from datetime import datetime
+from functools import partial
 
 from pydantic import BaseModel, field_validator, Field, AliasPath
 
 from .db import get_field_value_by_id
+
+
+class Integration(BaseModel):
+    project_name: str = Field(default="")
+    stage_id: str = Field(default="")
+    tg_bot_id: str = Field(default="")
+    google_spreadsheet_id: str = Field(default="")
+    sheet_name: str = Field(default="")
+    previous_sheet_names: list[str] = Field(default_factory=list)
+    skorozvon_scenario_name: str = Field(default="")
+
+    @field_validator('previous_sheet_names', mode='before')
+    def previous_sheet_names_validator(cls, previous_sheet_names):
+        return str(previous_sheet_names).split(", ") if previous_sheet_names else []
 
 
 class SkorozvonCall(BaseModel):
@@ -27,6 +42,7 @@ class SkorozvonForm(BaseModel):
 
 
 class BitrixDeal(BaseModel):
+    deal_id: int = Field(default=-1)
     stage_id: str = Field(validation_alias=AliasPath("result", "STAGE_ID"), default="")
     lead_name: str = Field(validation_alias=AliasPath("result", "UF_CRM_1664819061161"), default="")
     phone: str = Field(validation_alias=AliasPath("result", "UF_CRM_1665719874029"), default="")
@@ -41,6 +57,8 @@ class BitrixDeal(BaseModel):
     car_model: str = Field(validation_alias=AliasPath("result", "UF_CRM_1694678343732"), default="")
     project_name: str = Field(default="")
     link_to_lead: str = Field(default="")
+    is_valid_lead: bool = Field(default=True)
+    working_stage: str = Field(default="")
 
     @field_validator("lead_type")
     def lead_type_validator(cls, lead_type):

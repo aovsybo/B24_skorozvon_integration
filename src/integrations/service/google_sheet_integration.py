@@ -9,7 +9,7 @@ from google.oauth2.credentials import Credentials
 from django.conf import settings
 
 from .telegram_integration import send_message_to_dev
-from .validation import BitrixDeal
+from .validation import BitrixDeal, Integration
 
 
 def get_service():
@@ -94,12 +94,12 @@ def get_funnel_info_from_integration_table():
     return df[request_columns]
 
 
-def insert_data_by_stage(deal_info: BitrixDeal, is_invalid_stage: bool):
+def insert_data_by_stage(deal_info: BitrixDeal):
     """
     Приводим данные к форме для записи в гугл таблицу
     Для некоторых вороноке обозначены свои формы
     """
-    if is_invalid_stage:
+    if deal_info.is_valid_lead:
         insert_data = [
             deal_info.date,
             "",  ## для записи вручную
@@ -156,38 +156,41 @@ def insert_data_by_stage(deal_info: BitrixDeal, is_invalid_stage: bool):
     return insert_data
 
 
-def is_unique_data(phone: str, table_link: str, sheet_name: str, previous_sheet_names: list[str]):
+def is_unique_data(phone: str, integration: Integration):
     """
     Проверям, нет ли лида с таким номером в листах данной таблицы
     """
-    all_sheet_names = [sheet_name] + previous_sheet_names
+    all_sheet_names = [integration.sheet_name] + integration.previous_sheet_names
     phone_id = -1
     for current_sheet_name in all_sheet_names:
-        funnel_table = get_table_data(table_link, current_sheet_name)
+        funnel_table = get_table_data(integration.google_spreadsheet_id, current_sheet_name)
         for field_name in funnel_table[0]:
             if field_name in settings.PHONE_FIELD_NAMES:
                 phone_id = funnel_table[0].index(field_name)
                 break
         if phone_id == -1:
-            send_message_to_dev(f"Не найдено поле с телефоном в таблице {table_link}")
+            send_message_to_dev(f"Не найдено поле с телефоном в таблице {integration.table_link}")
             return True
         if phone in [deal_info[phone_id].strip() for deal_info in funnel_table[1:] if deal_info]:
             return False
     return True
 
 
-def send_to_google_sheet(deal_info: BitrixDeal, spreadsheet_id: str, sheet_name: str, is_invalid_stage=bool):
+def send_to_google_sheet(deal_info: BitrixDeal, integration: Integration):
     """
     Отправляем данные в гугл таблицу по указанному айди таблицы и названию листа
     """
     service = get_service()
-    insert_data = insert_data_by_stage(deal_info, is_invalid_stage)
+    insert_data = insert_data_by_stage(deal_info)
     body = {
         "values": [insert_data]
     }
     result = service.spreadsheets().values().append(
-        spreadsheetId=spreadsheet_id, range=f"{sheet_name}!1:{len(insert_data)}",
-        valueInputOption="USER_ENTERED", body=body).execute()
+        spreadsheetId=integration.google_spreadsheet_id,
+        range=f"{integration.sheet_name}!1:{len(insert_data)}",
+        valueInputOption="USER_ENTERED",
+        body=body
+    ).execute()
     return result
 
 
@@ -222,3 +225,10 @@ def get_funnel_table_links(stage_id: str, integrations_table, city: str):
         "sheet_name": links[index]["Название листа"],
         "previous_sheet_names": previous_sheet_names,
     }
+
+
+invalid_integration = Integration(
+    tg_bot_id=settings.TG_INVALID_LEADS_CHAT,
+    google_spreadsheet_id=settings.INVALID_LEADS_SHEET_ID,
+    sheet_name=settings.INVALID_LEADS_SHEET_NAME,
+)
