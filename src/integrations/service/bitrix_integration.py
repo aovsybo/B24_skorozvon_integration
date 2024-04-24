@@ -32,9 +32,7 @@ def get_id_for_doubles_stage(stage_id: str):
 
 def get_ids_for_invalid_stages(stage_id: str):
     stage_ids = get_id_for_stage_by_name(stage_id, ["Невостребованный лид", "Не прошёл KPI"])
-    if stage_ids:
-        return stage_id
-    return -1
+    return stage_ids if stage_ids else []
 
 
 def move_deal_to_doubles_stage(deal_info: BitrixDeal) -> None:
