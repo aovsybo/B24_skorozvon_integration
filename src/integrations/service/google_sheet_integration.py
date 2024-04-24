@@ -128,8 +128,8 @@ def insert_data_by_stage(deal_info: BitrixDeal):
             "",  ## для записи вручную
             deal_info.phone,
             f"Имя: {deal_info.lead_name}. Комментарий: {deal_info.lead_comment}",
-            deal_info['link_to_audio'],
-            deal_info['country'],
+            deal_info.link_to_audio,
+            deal_info.country,
         ]
     elif deal_info.stage_id == "C13:EXECUTING":
         # Для [П17]

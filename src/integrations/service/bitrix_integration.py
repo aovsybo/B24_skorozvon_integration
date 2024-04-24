@@ -129,6 +129,10 @@ def get_working_stage(stage_id: str):
 
 
 def get_suitable_integration(deal_info: BitrixDeal) -> Integration | None:
+    """
+    param: deal_info - информация о сделке
+    return Возвращает интеграцию если найдена для сделки либо None если не найдена
+    """
     integrations_data, integrations_exist = db.get_integrations_if_exist(deal_info.working_stage)
     if not integrations_exist:
         return None
@@ -148,6 +152,8 @@ def get_suitable_integration(deal_info: BitrixDeal) -> Integration | None:
 def handle_deal(deal_id: str):
     deal_info = get_deal_info(deal_id)
     integration = get_suitable_integration(deal_info)
+    print(deal_info)
+    print(integration)
     if not integration:
         return
     if deal_info.stage_id != integration.stage_id:
