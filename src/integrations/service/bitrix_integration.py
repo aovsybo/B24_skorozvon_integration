@@ -152,8 +152,6 @@ def get_suitable_integration(deal_info: BitrixDeal) -> Integration | None:
 def handle_deal(deal_id: str):
     deal_info = get_deal_info(deal_id)
     integration = get_suitable_integration(deal_info)
-    print(deal_info)
-    print(integration)
     if not integration:
         return
     if deal_info.stage_id != integration.stage_id:
