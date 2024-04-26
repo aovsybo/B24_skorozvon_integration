@@ -16,3 +16,7 @@ class CategoryNotFoundError(BitrixDealCreation):
 
 class SkorozvonAPIError(BitrixDealCreation):
     pass
+
+
+class IntegrationNotFoundError(BitrixDealCreation):
+    pass

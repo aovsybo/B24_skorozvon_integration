@@ -185,13 +185,16 @@ def send_to_google_sheet(deal_info: BitrixDeal, integration: Integration):
     body = {
         "values": [insert_data]
     }
-    result = service.spreadsheets().values().append(
-        spreadsheetId=integration.google_spreadsheet_id,
-        range=f"{integration.sheet_name}!1:{len(insert_data)}",
-        valueInputOption="USER_ENTERED",
-        body=body
-    ).execute()
-    return result
+    try:
+        return service.spreadsheets().values().append(
+            spreadsheetId=integration.google_spreadsheet_id,
+            range=f"{integration.sheet_name}!1:{len(insert_data)}",
+            valueInputOption="USER_ENTERED",
+            body=body
+        ).execute()
+    except Exception as e:
+        send_message_to_dev(f"Ошибка отправки лида в таблицу: {deal_info.link_to_lead}")
+
 
 
 def get_table_url_from_link(url: str):

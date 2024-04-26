@@ -15,7 +15,10 @@ def send_message_to_tg(deal_info: BitrixDeal, integration: Integration) -> None:
 Доп. комментарий: {deal_info.lead_type} | {deal_info.lead_qualification};\n
 Ссылка на запись: {deal_info.link_to_audio};\n
 Дата лида: {deal_info.date};"""
-    send_message(message, integration.tg_bot_id)
+    try:
+        send_message(message, integration.tg_bot_id)
+    except Exception as e:
+        send_message_to_dev(f"Ошибка отправки лида в телеграм: {deal_info.link_to_lead}")
 
 
 def send_message_to_dev(message: str):

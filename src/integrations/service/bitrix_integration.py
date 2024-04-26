@@ -5,7 +5,7 @@ import time
 from django.conf import settings
 
 from . import db
-from .exceptions import UnsuccessfulLeadCreationError
+from . import exceptions
 from .skorozvon_integration import skorozvon_api
 from .telegram_integration import send_message_to_dev_chat, send_message_to_tg
 from .validation import SkorozvonForm, SkorozvonCall, BitrixDeal, Integration
@@ -49,6 +49,7 @@ def get_deal_info(deal_id) -> BitrixDeal:
     response = requests.get(settings.BITRIX_GET_DEAL_BY_ID, params={"ID": deal_id}).content
     deal = BitrixDeal.model_validate_json(response)
     deal.deal_id = deal_id
+    deal.link_to_lead = f"{settings.BITRIX_BASE_LEAD_URL}{deal_id}/"
     deal.working_stage = get_working_stage(deal.stage_id)
     return deal
 
@@ -103,7 +104,7 @@ def create_bitrix_deal_by_form(lead_info: SkorozvonForm):
 @time_limit_signalization
 def create_bitrix_deal_by_call(lead_info: SkorozvonCall):
     if lead_info.result_name.lower() not in settings.BITRIX_SUCCESSFUL_RESULT_NAMES:
-        raise UnsuccessfulLeadCreationError(f"Result name '{lead_info.result_name}' is not successful")
+        raise exceptions.UnsuccessfulLeadCreationError(f"Result name '{lead_info.result_name}' is not successful")
     category_id = db.get_category_id(lead_info.scenario_id)
     call_data = skorozvon_api.get_call_audio(lead_info.call_id)
     share_link = get_file_share_link(call_data, lead_info.call_id)
@@ -151,12 +152,12 @@ def handle_deal(deal_id: str):
     deal_info = get_deal_info(deal_id)
     integration = get_suitable_integration(deal_info)
     if not integration:
+        send_message_to_dev_chat(f"Не найдена интеграция для сделки {deal_info.link_to_lead}")
         return
     if deal_info.stage_id != integration.stage_id:
         if deal_info.stage_id not in get_ids_for_invalid_stages(deal_info.stage_id):
             return
         deal_info.project_name = integration.project_name
-        deal_info.link_to_lead = f"{settings.BITRIX_BASE_LEAD_URL}{deal_id}/"
         deal_info.is_valid_lead = False
         integration = invalid_integration
     if is_unique_data(deal_info.phone, integration):
