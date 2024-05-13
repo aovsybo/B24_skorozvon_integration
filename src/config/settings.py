@@ -6,7 +6,6 @@ from dotenv import load_dotenv, find_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 load_dotenv(BASE_DIR / ".env")
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -42,7 +41,6 @@ CONFIG_SHEET_FIELDS = ["Тип лида", "Квалификация лида", "
 PHONE_FIELD_NAMES = ["Тел", "Номер абонента", "Телефон Лида", "Номер", "Телефон"]
 INVALID_LEADS_SHEET_ID = os.environ.get("INVALID_LEADS_SHEET_ID")
 INVALID_LEADS_SHEET_NAME = "Контроль Лидов 2024"
-
 
 TG_INVALID_LEADS_CHAT = os.environ.get("TG_INVALID_LEADS_CHAT")
 TG_API_TOKEN = os.environ.get("TG_API_TOKEN")
@@ -123,18 +121,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME':  os.environ.get("POSTGRES_DB"),
-        'USER':  os.environ.get("POSTGRES_USER"),
-        'PASSWORD':  os.environ.get("POSTGRES_PASSWORD"),
-        'HOST':  os.environ.get("POSTGRES_HOST"),
-        'PORT':  os.environ.get("POSTGRES_PORT", 5432),
+        'NAME': os.environ.get("POSTGRES_DB"),
+        'USER': os.environ.get("POSTGRES_USER"),
+        'PASSWORD': os.environ.get("POSTGRES_PASSWORD"),
+        'HOST': os.environ.get("POSTGRES_HOST"),
+        'PORT': os.environ.get("POSTGRES_PORT", 5432),
     }
 }
 
@@ -156,7 +153,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
@@ -167,7 +163,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
